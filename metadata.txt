@@ -1,0 +1,17 @@
+[general]
+name=Fast Multiband Zonal Statistics
+description=High-throughput zonal statistics for multiband rasters and multipart polygon layers.
+about=Processes rasters in bounded, block-aligned windows and aggregates many polygons and bands into a tidy CSV without repeatedly reading the raster for every feature.
+version=0.1.1
+qgisMinimumVersion=3.34
+author=Fast Multiband Zonal Statistics contributors
+email=
+repository=
+tracker=
+homepage=
+category=Raster
+tags=zonal statistics,raster,multiband,polygon,csv,performance
+icon=icon.svg
+hasProcessingProvider=yes
+experimental=True
+deprecated=False
