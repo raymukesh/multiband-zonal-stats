@@ -284,8 +284,28 @@ def _iter_masked_pixels(
                 progress(100.0 * completed / total_steps, f"Reading raster tiles ({completed}/{total_steps})")
 
 
+class _RowWriter:
+    """Wraps a ``csv.writer`` to give every data row a unique 1-based ``fid``.
+
+    ``header`` prepends the literal ``fid`` column name; ``row`` prepends the next
+    sequential id. The id is written in row order and is the stable identity of
+    each output row, so the same inputs always yield the same fids.
+    """
+
+    def __init__(self, writer):
+        self._writer = writer
+        self.count = 0
+
+    def header(self, columns):
+        self._writer.writerow(["fid", *columns])
+
+    def row(self, cells):
+        self.count += 1
+        self._writer.writerow([self.count, *cells])
+
+
 def _write_continuous(
-    np, gdal, ogr, osr, writer, dataset, gt, projection, windows, chunks,
+    np, gdal, ogr, osr, rows, dataset, gt, projection, windows, chunks,
     options, band_position, band_names, band_headers, nodata_by_band, zone_by_id, slots,
     is_cancelled, progress,
 ):
@@ -361,14 +381,13 @@ def _write_continuous(
                 cells.append(float(math.sqrt(max(0.0, m2[row, internal_id] / n))))
         return cells
 
-    rows_written = 0
     if options.output_format == "wide":
         # One row per zone; each band contributes its statistics, prefixed with
         # the band's (sanitised, unique) name — e.g. ndvi_mean, ndvi_sum.
         header = ["polygon_id", "polygon_name"]
         for band_index in options.bands:
             header.extend(f"{band_headers[band_index]}_{name}" for name in options.statistics)
-        writer.writerow(header)
+        rows.header(header)
         for internal_id in ordered_ids:
             zone = zone_by_id[internal_id]
             cells = [zone.feature_id, zone.name]
@@ -376,24 +395,22 @@ def _write_continuous(
                 row = band_position[band_index]
                 n = int(count[row, internal_id])
                 cells.extend(stat_cells(row, internal_id, n))
-            writer.writerow(cells)
-            rows_written += 1
+            rows.row(cells)
     else:
         # Long format: one row per (zone, band).
         header = ["polygon_id", "polygon_name", "band_index", "band_name"]
         header.extend(options.statistics)
-        writer.writerow(header)
+        rows.header(header)
         for band_index in options.bands:
             row = band_position[band_index]
             for internal_id in ordered_ids:
                 zone = zone_by_id[internal_id]
                 n = int(count[row, internal_id])
-                writer.writerow(
+                rows.row(
                     [zone.feature_id, zone.name, band_index, band_names[band_index]]
                     + stat_cells(row, internal_id, n)
                 )
-                rows_written += 1
-    return rows_written
+    return rows.count
 
 
 def _pick_extreme(counts_map, most):
@@ -408,7 +425,7 @@ def _pick_extreme(counts_map, most):
 
 
 def _write_categorical(
-    np, gdal, ogr, osr, writer, dataset, gt, projection, windows, chunks,
+    np, gdal, ogr, osr, rows, dataset, gt, projection, windows, chunks,
     options, band_position, band_names, band_headers, nodata_by_band, zone_by_id, slots,
     is_cancelled, progress,
 ):
@@ -455,10 +472,9 @@ def _write_categorical(
             )
 
     ordered_ids = sorted(zone_by_id)
-    rows_written = 0
     if breakdown:
         # One row per (zone, band, class): the full class composition.
-        writer.writerow(
+        rows.header(
             ["polygon_id", "polygon_name", "band_index", "band_name", "class", "pixel_count", "fraction"]
         )
         for band_index in options.bands:
@@ -469,19 +485,17 @@ def _write_categorical(
                 base = [zone.feature_id, zone.name, band_index, band_names[band_index]]
                 if not counts_map:
                     # Keep every zone visible even when it covers no valid pixels.
-                    writer.writerow(base + ["", 0, ""])
-                    rows_written += 1
+                    rows.row(base + ["", 0, ""])
                     continue
                 valid_total = sum(counts_map.values())
                 for class_code in sorted(counts_map):
                     tally = counts_map[class_code]
-                    writer.writerow(base + [class_code, tally, tally / valid_total])
-                    rows_written += 1
+                    rows.row(base + [class_code, tally, tally / valid_total])
     elif options.output_format == "counts":
         # One row per (zone, band); one pixel-count column per class, using the
         # union of classes seen anywhere so every row shares the same columns.
         all_classes = sorted(distinct_classes)
-        writer.writerow(
+        rows.header(
             ["polygon_id", "polygon_name", "band_index", "band_name"]
             + [f"class_{class_code}" for class_code in all_classes]
         )
@@ -490,16 +504,15 @@ def _write_categorical(
             for internal_id in ordered_ids:
                 zone = zone_by_id[internal_id]
                 counts_map = class_counts.get((row, internal_id), {})
-                writer.writerow(
+                rows.row(
                     [zone.feature_id, zone.name, band_index, band_names[band_index]]
                     + [counts_map.get(class_code, 0) for class_code in all_classes]
                 )
-                rows_written += 1
     else:
         # One row per (zone, band): summary statistics of the class histogram.
         header = ["polygon_id", "polygon_name", "band_index", "band_name"]
         header.extend(options.statistics)
-        writer.writerow(header)
+        rows.header(header)
         for band_index in options.bands:
             row = band_position[band_index]
             for internal_id in ordered_ids:
@@ -520,9 +533,8 @@ def _write_categorical(
                         cells.append(_pick_extreme(counts_map, most=True))
                     elif name == "minority":
                         cells.append(_pick_extreme(counts_map, most=False))
-                writer.writerow(cells)
-                rows_written += 1
-    return rows_written
+                rows.row(cells)
+    return rows.count
 
 
 def run_zonal_statistics(
@@ -606,7 +618,7 @@ def run_zonal_statistics(
         }
         writer_fn = _write_categorical if options.mode == "categorical" else _write_continuous
         rows_written = writer_fn(
-            np, gdal, ogr, osr, writer, dataset, gt, projection, windows, chunks,
+            np, gdal, ogr, osr, _RowWriter(writer), dataset, gt, projection, windows, chunks,
             options, band_position, band_names, band_headers, nodata_by_band, zone_by_id, slots,
             is_cancelled, progress,
         )

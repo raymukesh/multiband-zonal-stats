@@ -118,8 +118,8 @@ class CategoricalEngineTests(unittest.TestCase):
         self.assertEqual(len(rows), 1)
         row = rows[0]
         header = list(row)
-        self.assertEqual(header[:4], ["polygon_id", "polygon_name", "band_index", "band_name"])
-        self.assertEqual(header[4:], ["class_1", "class_2", "class_3", "class_4"])
+        self.assertEqual(header[:5], ["fid", "polygon_id", "polygon_name", "band_index", "band_name"])
+        self.assertEqual(header[5:], ["class_1", "class_2", "class_3", "class_4"])
         self.assertEqual(int(row["class_1"]), 4)
         self.assertEqual(int(row["class_2"]), 4)
         self.assertEqual(int(row["class_3"]), 5)
@@ -139,6 +139,12 @@ class CategoricalEngineTests(unittest.TestCase):
         self.assertEqual(int(by_name["left"]["class_3"]), 4)
         self.assertEqual(int(by_name["right"]["class_2"]), 4)
         self.assertEqual(int(by_name["right"]["class_4"]), 3)
+
+    def test_fid_is_sequential_across_breakdown_rows(self):
+        rows = run(self.classes_raster(), self.full_zone(), [], output_format="breakdown")
+        self.assertEqual(list(rows[0])[0], "fid")
+        fids = [int(r["fid"]) for r in rows]
+        self.assertEqual(fids, list(range(1, len(rows) + 1)))
 
     def test_nodata_is_excluded_and_counted(self):
         raster = self.classes_raster(nodata=4)  # the three class-4 pixels are nodata

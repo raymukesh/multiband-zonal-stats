@@ -65,7 +65,7 @@ minimum, maximum, sum, mean, and population standard deviation (divided by `n`,
 matching QGIS). Two layouts:
 
 - **Long** — one row per polygon and band:
-  `polygon_id,polygon_name,band_index,band_name,<selected stats>`
+  `fid,polygon_id,polygon_name,band_index,band_name,<selected stats>`
 - **Wide** — one row per polygon; each band's stats become columns prefixed with
   that band's own (sanitised, unique) name, e.g. `ndvi_mean,ndvi_sum`.
 
@@ -93,8 +93,10 @@ sanitised (lowercased, non-alphanumerics to underscores, collisions numbered)
 via `utils.unique_header_names`, which — unlike `clean_column_name` — keeps a
 leading digit so `2020_ndvi` stays as written.
 
-CSV output is UTF-8 and is written to a temporary file before an atomic rename,
-so cancellation or failure never publishes a partial result.
+Every row, in every layout, begins with a unique 1-based `fid` column assigned in
+write order — the stable identity of that row (`engine._RowWriter`). CSV output is
+UTF-8 and is written to a temporary file before an atomic rename, so cancellation
+or failure never publishes a partial result.
 
 > Note: earlier releases (≤0.4.0) emitted per-zone `area`/`area_unit` columns and
 > metric-area units. That was removed in 0.4.0 — area no longer forces a

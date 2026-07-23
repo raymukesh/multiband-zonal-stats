@@ -2,6 +2,8 @@
 
 ## 0.5.0 — 2026-07-22
 
+- Prepend a unique 1-based `fid` column to every output row, in all layouts, as
+  a stable per-row identity (e.g. for joins or database imports)
 - Rename the plugin's display name to **Multiband Zonal Stats** across menus, the
   dialog, and the Processing group and algorithm titles, and rename the packaged
   plugin folder/zip to `multiband_zonal_stats`. The provider id `fastzonalstats`

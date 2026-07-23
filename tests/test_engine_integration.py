@@ -235,7 +235,7 @@ class EngineIntegrationTests(unittest.TestCase):
         # One row per polygon, not per polygon-band.
         self.assertEqual(len(rows), 2)
         header = list(rows[0])
-        self.assertEqual(header[:2], ["polygon_id", "polygon_name"])
+        self.assertEqual(header[:3], ["fid", "polygon_id", "polygon_name"])
         # Each band contributes its statistics, prefixed with the band's own name
         # (here the band_001/band_002 fallback, since the raster has no names).
         self.assertIn("band_001_mean", header)
@@ -278,6 +278,13 @@ class EngineIntegrationTests(unittest.TestCase):
         # Wide: the same label sanitised into a spreadsheet-safe column header.
         wide_rows = run(str(path), zones, ["mean"], output_format="wide", band_prefix="2020_")
         self.assertIn("2020_surface_temp_mean", list(wide_rows[0]))
+
+    def test_fid_is_a_unique_sequential_first_column(self):
+        rows = run(self.two_band_raster(), self.overlapping_zones(), ["count"], bands=[1, 2])
+        self.assertEqual(list(rows[0])[0], "fid")
+        fids = [int(r["fid"]) for r in rows]
+        self.assertEqual(fids, list(range(1, len(rows) + 1)))
+        self.assertEqual(len(set(fids)), len(rows))
 
     def test_unknown_output_format_is_rejected(self):
         raster = self.two_band_raster()
