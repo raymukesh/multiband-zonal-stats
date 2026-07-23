@@ -1,4 +1,4 @@
-# Fast Multiband Zonal Statistics
+# Multiband Zonal Stats
 
 A QGIS Processing plugin for producing tidy zonal-statistics CSV files from
 multiband rasters and polygon or multipolygon layers.
@@ -100,7 +100,7 @@ the legacy one.
 1. Rename or copy this directory to `fast_multiband_zonal_stats` inside the QGIS
    user profile's `python/plugins` directory.
 2. Restart QGIS or reload plugins.
-3. Enable **Fast Multiband Zonal Statistics** in Plugin Manager.
+3. Enable **Multiband Zonal Stats** in Plugin Manager.
 4. Open it from the Raster menu, toolbar, or Processing Toolbox.
 
 No separate Python packages are required beyond the GDAL and NumPy versions
@@ -109,7 +109,7 @@ distributed with QGIS.
 ## Smoke test in QGIS
 
 1. Load a multiband raster and a polygon layer.
-2. Open **Raster → Fast Zonal Statistics → Fast Multiband Zonal Statistics**.
+2. Open it from the **Raster → Multiband Zonal Stats** menu, the toolbar, or the Processing Toolbox.
 3. Select inputs, leave bands as `all`, choose an output CSV and run.
 4. Compare several polygon/band results with QGIS's standard zonal statistics.
 5. Repeat with overlapping multipolygons, nodata and the all-touched option.

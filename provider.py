@@ -13,7 +13,7 @@ class FastZonalStatsProvider(QgsProcessingProvider):
         return "fastzonalstats"
 
     def name(self):
-        return self.tr("Fast Zonal Statistics")
+        return self.tr("Multiband Zonal Stats")
 
     def longName(self):
         return self.name()

@@ -1,12 +1,12 @@
 [general]
-name=Fast Multiband Zonal Statistics
+name=Multiband Zonal Stats
 description=High-throughput continuous and categorical zonal statistics for multiband rasters and multipart polygon layers.
 about=Processes rasters in bounded, block-aligned windows and aggregates many polygons and bands into a tidy CSV without repeatedly reading the raster for every feature. Handles both continuous rasters (mean, sum, standard deviation) and categorical rasters (majority, minority, variety, per-class breakdown).
 version=0.5.0
 qgisMinimumVersion=3.34
 qgisMaximumVersion=4.99
 supportsQt6=True
-author=Fast Multiband Zonal Statistics contributors
+author=Multiband Zonal Stats contributors
 email=
 repository=
 tracker=

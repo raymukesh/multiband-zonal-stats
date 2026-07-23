@@ -21,10 +21,10 @@ class FastZonalStatsPlugin:
         if self.iface is None:
             return
         icon = QIcon(str(Path(__file__).with_name("icon.svg")))
-        self.action = QAction(icon, self.tr("Fast Multiband Zonal Statistics…"), self.iface.mainWindow())
+        self.action = QAction(icon, self.tr("Multiband Zonal Stats…"), self.iface.mainWindow())
         self.action.setObjectName("fastMultibandZonalStatisticsAction")
         self.action.triggered.connect(self.openDialog)
-        self.iface.addPluginToRasterMenu(self.tr("Fast Zonal Statistics"), self.action)
+        self.iface.addPluginToRasterMenu(self.tr("Multiband Zonal Stats"), self.action)
         self.iface.addToolBarIcon(self.action)
 
     def unload(self):
@@ -32,7 +32,7 @@ class FastZonalStatsPlugin:
             self.dialog.close()
             self.dialog = None
         if self.action and self.iface is not None:
-            self.iface.removePluginRasterMenu(self.tr("Fast Zonal Statistics"), self.action)
+            self.iface.removePluginRasterMenu(self.tr("Multiband Zonal Stats"), self.action)
             self.iface.removeToolBarIcon(self.action)
         if self.provider:
             QgsApplication.processingRegistry().removeProvider(self.provider)

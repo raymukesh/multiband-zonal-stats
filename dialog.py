@@ -69,7 +69,7 @@ class FastZonalStatsDialog(QDialog):
         self.context = None
         self.feedback = None
         self.output_path = None
-        self.setWindowTitle(self.tr("Fast Multiband Zonal Statistics"))
+        self.setWindowTitle(self.tr("Multiband Zonal Stats"))
         self.setWindowIcon(QIcon(str(Path(__file__).with_name("icon.svg"))))
         self.setMinimumSize(520, 520)
         self.resize(640, 700)
@@ -506,13 +506,13 @@ class FastZonalStatsDialog(QDialog):
             self.statusLabel.setText(self.tr("Complete — the CSV is ready."))
             self.openButton.setVisible(True)
             self.iface.messageBar().pushSuccess(
-                self.tr("Fast Zonal Statistics"), self.tr("Zonal statistics CSV created successfully.")
+                self.tr("Multiband Zonal Stats"), self.tr("Zonal statistics CSV created successfully.")
             )
         else:
             self.progressBar.setValue(0)
             self.statusLabel.setText(self.tr("The analysis did not complete. Check the Processing log."))
             self.iface.messageBar().pushWarning(
-                self.tr("Fast Zonal Statistics"), self.tr("Analysis stopped or failed; no partial CSV was published.")
+                self.tr("Multiband Zonal Stats"), self.tr("Analysis stopped or failed; no partial CSV was published.")
             )
 
     def _setRunning(self, running):

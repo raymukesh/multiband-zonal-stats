@@ -338,7 +338,7 @@ class FastZonalStatisticsAlgorithm(_BaseZonalStatisticsAlgorithm):
         return "multiband_zonal_statistics"
 
     def displayName(self):
-        return self.tr("Fast multiband zonal statistics (continuous)")
+        return self.tr("Multiband zonal stats (continuous)")
 
     def shortHelpString(self):
         return self.tr(
@@ -393,7 +393,7 @@ class CategoricalZonalStatisticsAlgorithm(_BaseZonalStatisticsAlgorithm):
         return "categorical_zonal_statistics"
 
     def displayName(self):
-        return self.tr("Fast multiband zonal statistics (categorical)")
+        return self.tr("Multiband zonal stats (categorical)")
 
     def shortHelpString(self):
         return self.tr(

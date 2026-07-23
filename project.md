@@ -1,4 +1,4 @@
-# Project Context: Fast Multiband Zonal Statistics
+# Project Context: Multiband Zonal Stats
 
 This document is the durable technical handoff for continuing the project on a
 different computer or in a new development session. Read it together with
