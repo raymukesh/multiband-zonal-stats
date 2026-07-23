@@ -4,6 +4,8 @@
 
 - Prepend a unique 1-based `fid` column to every output row, in all layouts, as
   a stable per-row identity (e.g. for joins or database imports)
+- Add an optional **Decimal places** control (dialog and both algorithms) that
+  fixes the decimals of numeric cells; `-1` / default keeps full precision
 - Rename the plugin's display name to **Multiband Zonal Stats** across menus, the
   dialog, and the Processing group and algorithm titles, and rename the packaged
   plugin folder/zip to `multiband_zonal_stats`. The provider id `fastzonalstats`

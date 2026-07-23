@@ -43,6 +43,9 @@ class EngineOptions:
     # rename the raster's bands, only the labels/columns the CSV carries.
     band_prefix: str = ""
     band_suffix: str = ""
+    # Round floating-point cells to this many decimals in the CSV. None keeps the
+    # full-precision repr (the default); a non-negative int fixes the decimals.
+    decimal_places: int | None = None
     # "continuous" reduces each zone to numeric statistics; "categorical" builds
     # a per-zone class histogram (majority, minority, variety, class breakdown).
     mode: str = "continuous"
@@ -290,18 +293,28 @@ class _RowWriter:
     ``header`` prepends the literal ``fid`` column name; ``row`` prepends the next
     sequential id. The id is written in row order and is the stable identity of
     each output row, so the same inputs always yield the same fids.
+
+    When ``decimal_places`` is set, floating-point cells are formatted to that many
+    decimals; integers and text pass through untouched. Applying it here keeps
+    every layout consistent from one place.
     """
 
-    def __init__(self, writer):
+    def __init__(self, writer, decimal_places=None):
         self._writer = writer
+        self._places = decimal_places
         self.count = 0
+
+    def _format(self, cell):
+        if self._places is not None and isinstance(cell, float):
+            return f"{cell:.{self._places}f}"
+        return cell
 
     def header(self, columns):
         self._writer.writerow(["fid", *columns])
 
     def row(self, cells):
         self.count += 1
-        self._writer.writerow([self.count, *cells])
+        self._writer.writerow([self.count, *(self._format(cell) for cell in cells)])
 
 
 def _write_continuous(
@@ -561,6 +574,8 @@ def run_zonal_statistics(
     valid_formats = OUTPUT_FORMATS if options.mode == "continuous" else CATEGORICAL_LAYOUTS
     if options.output_format not in valid_formats:
         raise ValueError(f"Unsupported output format: {options.output_format}")
+    if options.decimal_places is not None and options.decimal_places < 0:
+        raise ValueError("decimal_places must be zero or greater, or None for full precision.")
     dataset = gdal.Open(raster_path, gdal.GA_ReadOnly)
     if dataset is None:
         raise ValueError(f"GDAL could not open raster: {raster_path}")
@@ -618,7 +633,7 @@ def run_zonal_statistics(
         }
         writer_fn = _write_categorical if options.mode == "categorical" else _write_continuous
         rows_written = writer_fn(
-            np, gdal, ogr, osr, _RowWriter(writer), dataset, gt, projection, windows, chunks,
+            np, gdal, ogr, osr, _RowWriter(writer, options.decimal_places), dataset, gt, projection, windows, chunks,
             options, band_position, band_names, band_headers, nodata_by_band, zone_by_id, slots,
             is_cancelled, progress,
         )

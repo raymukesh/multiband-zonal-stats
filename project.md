@@ -94,9 +94,12 @@ via `utils.unique_header_names`, which — unlike `clean_column_name` — keeps 
 leading digit so `2020_ndvi` stays as written.
 
 Every row, in every layout, begins with a unique 1-based `fid` column assigned in
-write order — the stable identity of that row (`engine._RowWriter`). CSV output is
-UTF-8 and is written to a temporary file before an atomic rename, so cancellation
-or failure never publishes a partial result.
+write order — the stable identity of that row (`engine._RowWriter`). The same
+wrapper applies the optional `decimal_places` setting: when set (0–15), it fixes
+the decimals of floating-point cells (stats, fraction) while leaving integers and
+text untouched; `None` (the default, `-1` in the UI) keeps the full-precision
+repr. CSV output is UTF-8 and is written to a temporary file before an atomic
+rename, so cancellation or failure never publishes a partial result.
 
 > Note: earlier releases (≤0.4.0) emitted per-zone `area`/`area_unit` columns and
 > metric-area units. That was removed in 0.4.0 — area no longer forces a

@@ -234,6 +234,12 @@ class FastZonalStatsDialog(QDialog):
         # --- Output ---
         output_group = QGroupBox(self.tr("Output"))
         output_form = QFormLayout(output_group)
+        self.decimals = QSpinBox()
+        # -1 is shown as "Full precision"; 0-15 fix the number of decimals.
+        self.decimals.setRange(-1, 15)
+        self.decimals.setValue(-1)
+        self.decimals.setSpecialValueText(self.tr("Full precision"))
+        output_form.addRow(self.tr("Decimal places"), self.decimals)
         self.outputWidget = QgsFileWidget()
         self.outputWidget.setStorageMode(SAVE_FILE_MODE)
         self.outputWidget.setFilter(self.tr("CSV files (*.csv)"))
@@ -473,6 +479,7 @@ class FastZonalStatsDialog(QDialog):
             "ALL_TOUCHED": self.allTouched.isChecked(),
             "TILE_SIZE": self.tileSize.value(),
             "BAND_CHUNK": self.bandChunk.value(),
+            "DECIMAL_PLACES": self.decimals.value(),
             "OUTPUT": output,
         }
         self.output_path = output

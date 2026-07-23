@@ -60,6 +60,7 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
     ALL_TOUCHED = "ALL_TOUCHED"
     TILE_SIZE = "TILE_SIZE"
     BAND_CHUNK = "BAND_CHUNK"
+    DECIMAL_PLACES = "DECIMAL_PLACES"
     OUTPUT = "OUTPUT"
 
     def tr(self, text):
@@ -176,6 +177,16 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
         chunk.setFlags(chunk.flags() | PARAMETER_FLAG_ADVANCED)
         self.addParameter(chunk)
         self.addParameter(
+            QgsProcessingParameterNumber(
+                self.DECIMAL_PLACES,
+                self.tr("Decimal places (-1 keeps full precision)"),
+                type=PARAMETER_NUMBER_INTEGER,
+                defaultValue=-1,
+                minValue=-1,
+                maxValue=15,
+            )
+        )
+        self.addParameter(
             QgsProcessingParameterFileDestination(
                 self.OUTPUT,
                 self.tr("Output CSV"),
@@ -190,12 +201,14 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
         raise NotImplementedError
 
     def _executionKwargs(self, parameters, context):
+        places = self.parameterAsInt(parameters, self.DECIMAL_PLACES, context)
         return dict(
             all_touched=self.parameterAsBool(parameters, self.ALL_TOUCHED, context),
             tile_size=self.parameterAsInt(parameters, self.TILE_SIZE, context),
             band_chunk_size=self.parameterAsInt(parameters, self.BAND_CHUNK, context),
             band_prefix=self.parameterAsString(parameters, self.BAND_PREFIX, context) or "",
             band_suffix=self.parameterAsString(parameters, self.BAND_SUFFIX, context) or "",
+            decimal_places=None if places < 0 else places,
         )
 
     # --- processing ------------------------------------------------------

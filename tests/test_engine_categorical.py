@@ -140,6 +140,14 @@ class CategoricalEngineTests(unittest.TestCase):
         self.assertEqual(int(by_name["right"]["class_2"]), 4)
         self.assertEqual(int(by_name["right"]["class_4"]), 3)
 
+    def test_decimal_places_formats_the_fraction(self):
+        zones = [zone(1, "POLYGON ((2 0, 4 0, 4 4, 2 4, 2 0))", "right")]  # classes 2,3,4
+        rows = run(self.classes_raster(), zones, [], output_format="breakdown", decimal_places=3)
+        by_class = {int(r["class"]): r for r in rows}
+        self.assertEqual(by_class[2]["fraction"], "0.500")  # 4/8
+        self.assertEqual(by_class[3]["fraction"], "0.125")  # 1/8
+        self.assertEqual(by_class[2]["pixel_count"], "4")   # integer stays unformatted
+
     def test_fid_is_sequential_across_breakdown_rows(self):
         rows = run(self.classes_raster(), self.full_zone(), [], output_format="breakdown")
         self.assertEqual(list(rows[0])[0], "fid")

@@ -286,6 +286,24 @@ class EngineIntegrationTests(unittest.TestCase):
         self.assertEqual(fids, list(range(1, len(rows) + 1)))
         self.assertEqual(len(set(fids)), len(rows))
 
+    def test_decimal_places_rounds_only_float_cells(self):
+        rows = run(
+            self.two_band_raster(), self.overlapping_zones(),
+            ["count", "mean", "stddev"], bands=[1], decimal_places=2,
+        )
+        overlap = next(r for r in rows if r["polygon_name"] == "overlap")
+        self.assertEqual(overlap["mean"], "9.00")    # 9.0 fixed to 2 decimals
+        self.assertEqual(overlap["stddev"], "2.16")  # sqrt(28/6) = 2.16024...
+        self.assertEqual(overlap["count"], "6")      # integer cell is untouched
+
+    def test_negative_decimal_places_is_rejected(self):
+        options = engine.EngineOptions(bands=[1], statistics=["mean"], decimal_places=-1)
+        with tempfile.TemporaryDirectory() as folder:
+            with self.assertRaisesRegex(ValueError, "decimal_places"):
+                engine.run_zonal_statistics(
+                    self.two_band_raster(), self.overlapping_zones(), str(Path(folder) / "x.csv"), options
+                )
+
     def test_unknown_output_format_is_rejected(self):
         raster = self.two_band_raster()
         options = engine.EngineOptions(bands=[1], statistics=["count"], output_format="tall")

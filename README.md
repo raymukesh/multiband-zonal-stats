@@ -22,6 +22,7 @@ counted for every polygon. Multipart features retain one zone ID.
     zone and band, or a full per-class pixel count and fraction breakdown
 - Band lists and ranges such as `all`, `1-8`, or `1,3,7`
 - Every output row starts with a unique `fid` column as its stable identity
+- Optional fixed **decimal places** for numeric cells (default: full precision)
 - Output columns keep the raster's own band names, with an optional common prefix
   and suffix (for example `2020_ndvi`)
 - Pixel-centre or all-touched inclusion
