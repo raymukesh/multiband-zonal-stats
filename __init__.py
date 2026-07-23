@@ -1,4 +1,4 @@
-"""QGIS entry point for Fast Multiband Zonal Statistics."""
+"""QGIS entry point for Multiband Zonal Stats."""
 
 
 def classFactory(iface):

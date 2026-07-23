@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Multiband Zonal Stats — Help</title>
+<style>
+  :root {
+    --bg: #f6f8fb;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --blue: #2563eb;
+    --teal: #0f766e;
+    --amber: #d97706;
+    --green: #059669;
+    --violet: #7c3aed;
+    --code-bg: #0f172a;
+    --code-ink: #e2e8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    line-height: 1.6;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px 72px; }
+
+  header.hero {
+    background: linear-gradient(120deg, #0f766e 0%, #1d4ed8 55%, #7c3aed 100%);
+    color: #fff;
+    padding: 44px 24px 40px;
+    text-align: center;
+  }
+  header.hero h1 { margin: 0 0 6px; font-size: 2.2rem; letter-spacing: -0.5px; }
+  header.hero p { margin: 0; opacity: 0.92; font-size: 1.06rem; }
+  .pill {
+    display: inline-block; margin-top: 14px; padding: 4px 14px; border-radius: 999px;
+    background: rgba(255,255,255,0.18); font-size: 0.85rem; font-weight: 600;
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;
+    margin: -22px auto 8px; max-width: 880px; padding: 14px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(15,23,42,0.07);
+  }
+  nav.toc a {
+    text-decoration: none; color: var(--blue); font-weight: 600; font-size: 0.9rem;
+    padding: 6px 12px; border-radius: 8px; background: #eef4ff;
+  }
+  nav.toc a:hover { background: #dbe7ff; }
+
+  section { margin-top: 34px; }
+  h2 {
+    font-size: 1.45rem; margin: 0 0 14px; padding-bottom: 8px;
+    border-bottom: 3px solid var(--line);
+  }
+  h2 .emoji { margin-right: 8px; }
+  h3 { font-size: 1.1rem; margin: 22px 0 8px; }
+
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 18px 20px; box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+  }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 680px) { .grid2 { grid-template-columns: 1fr; } }
+
+  .mode { border-top: 5px solid var(--blue); }
+  .mode.cat { border-top-color: var(--amber); }
+  .mode h3 { margin-top: 4px; }
+
+  .chip {
+    display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 0.8rem;
+    font-weight: 700; margin: 2px 4px 2px 0;
+  }
+  .chip.blue { background: #e0ecff; color: #1e40af; }
+  .chip.amber { background: #fef1dc; color: #9a5b00; }
+  .chip.green { background: #d9f7ec; color: #047857; }
+  .chip.violet { background: #efe6fe; color: #6d28d9; }
+
+  table { width: 100%; border-collapse: collapse; margin: 10px 0; font-size: 0.95rem; }
+  th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+  th { background: #f1f5f9; font-weight: 700; }
+  tbody tr:nth-child(even) { background: #fafcff; }
+  td code { background: #eef2ff; color: #3730a3; padding: 1px 6px; border-radius: 5px; }
+
+  .codewrap { overflow-x: auto; border-radius: 12px; margin: 12px 0; }
+  pre {
+    margin: 0; background: var(--code-bg); color: var(--code-ink);
+    padding: 14px 16px; font-size: 0.85rem; line-height: 1.5;
+    font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+    min-width: max-content;
+  }
+  pre .hl { color: #7dd3fc; }
+  pre .fid { color: #fca5a5; font-weight: 700; }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 0; }
+  .steps li {
+    position: relative; padding: 10px 10px 10px 52px; margin-bottom: 10px;
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+  }
+  .steps li::before {
+    counter-increment: step; content: counter(step);
+    position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+    width: 28px; height: 28px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--blue));
+    color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;
+  }
+
+  .callout { border-radius: 12px; padding: 14px 16px; margin: 14px 0; border-left: 6px solid; }
+  .callout.tip { background: #ecfdf5; border-color: var(--green); }
+  .callout.warn { background: #fffbeb; border-color: var(--amber); }
+  .callout b { display: block; margin-bottom: 2px; }
+
+  footer { text-align: center; color: var(--muted); margin-top: 44px; font-size: 0.9rem; }
+  a { color: var(--blue); }
+  .muted { color: var(--muted); }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>🛰️ Multiband Zonal Stats</h1>
+  <p>Fast, tidy zonal statistics for multiband rasters &amp; polygon layers</p>
+  <span class="pill">Version 0.5.0 · QGIS 3.34+</span>
+</header>
+
+<div class="wrap">
+
+  <nav class="toc">
+    <a href="#start">Quick start</a>
+    <a href="#modes">Modes</a>
+    <a href="#stats">Statistics</a>
+    <a href="#layouts">Layouts &amp; examples</a>
+    <a href="#bands">Band names</a>
+    <a href="#fid">fid &amp; decimals</a>
+    <a href="#crs">Coordinate systems</a>
+    <a href="#tips">Tips &amp; troubleshooting</a>
+  </nav>
+
+  <section id="what">
+    <h2><span class="emoji">⚡</span>What it does</h2>
+    <div class="card">
+      <p style="margin-top:0">
+        This plugin summarises a <b>multiband raster</b> over the polygons of a vector layer and
+        writes a clean <b>CSV</b>. Instead of re-reading the raster once per polygon (the slow,
+        classic pattern), it reads the raster in <b>bounded tiles</b> and aggregates every zone and
+        band together with NumPy — so the work scales with the raster area touched, not with
+        <em>polygons × bands</em>.
+      </p>
+      <p style="margin-bottom:0">
+        <span class="chip green">Overlapping zones handled</span>
+        <span class="chip green">Multipart polygons</span>
+        <span class="chip green">Per-band nodata</span>
+        <span class="chip green">Bounded memory</span>
+        <span class="chip green">Atomic output</span>
+      </p>
+    </div>
+  </section>
+
+  <section id="start">
+    <h2><span class="emoji">🚀</span>Quick start</h2>
+    <ol class="steps">
+      <li><b>Pick your layers</b> — a file-based (GDAL) raster and a polygon layer.</li>
+      <li><b>Choose a tab</b> — <span class="chip blue">Continuous</span> for measured values
+          (elevation, NDVI) or <span class="chip amber">Categorical</span> for class codes
+          (land cover, soils).</li>
+      <li><b>Select statistics and a layout</b> in that tab.</li>
+      <li><b>Set the output CSV</b> (and optionally decimal places), then <b>Run analysis</b>.</li>
+    </ol>
+    <p class="muted">Available from the <b>Raster → Multiband Zonal Stats</b> menu, the toolbar,
+       and the Processing Toolbox (two algorithms). Runs in the background with progress and a
+       safe Cancel.</p>
+  </section>
+
+  <section id="modes">
+    <h2><span class="emoji">🎛️</span>Two modes — pick the one that matches your raster</h2>
+    <div class="grid2">
+      <div class="card mode">
+        <h3>📈 Continuous</h3>
+        <p class="muted" style="margin-top:0">Measured quantities where averaging makes sense.</p>
+        <p><b>Examples:</b> elevation, temperature, rainfall, reflectance, NDVI.</p>
+        <p><b>Statistics:</b>
+          <span class="chip blue">count</span><span class="chip blue">nodata</span>
+          <span class="chip blue">min</span><span class="chip blue">max</span>
+          <span class="chip blue">sum</span><span class="chip blue">mean</span>
+          <span class="chip blue">stddev</span></p>
+        <p style="margin-bottom:0"><b>Layouts:</b> Long or Wide.</p>
+      </div>
+      <div class="card mode cat">
+        <h3>🗺️ Categorical</h3>
+        <p class="muted" style="margin-top:0">Discrete class codes where averaging is meaningless.</p>
+        <p><b>Examples:</b> land cover, soil type, zoning, CORINE classes.</p>
+        <p><b>Statistics:</b>
+          <span class="chip amber">majority</span><span class="chip amber">minority</span>
+          <span class="chip amber">variety</span><span class="chip amber">count</span>
+          <span class="chip amber">nodata</span></p>
+        <p style="margin-bottom:0"><b>Layouts:</b> Summary, Class breakdown, or Class counts.</p>
+      </div>
+    </div>
+    <div class="callout warn">
+      <b>⚠️ Why the split matters</b>
+      The mean of land-cover codes {1=water, 2=forest, 5=urban} is a meaningless number.
+      Categorical mode summarises the <em>class composition</em> instead — and rejects a raster
+      with more than 65,536 distinct values as "actually continuous".
+    </div>
+  </section>
+
+  <section id="stats">
+    <h2><span class="emoji">📐</span>Statistics reference</h2>
+    <h3>Continuous <span class="chip blue">📈</span></h3>
+    <table>
+      <thead><tr><th>Name</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>count</code></td><td>Number of valid (non-nodata) pixels in the zone</td></tr>
+        <tr><td><code>nodata</code></td><td>Number of nodata pixels covered by the zone</td></tr>
+        <tr><td><code>min</code> / <code>max</code></td><td>Smallest / largest valid value</td></tr>
+        <tr><td><code>sum</code></td><td>Sum of valid values</td></tr>
+        <tr><td><code>mean</code></td><td>Average of valid values</td></tr>
+        <tr><td><code>stddev</code></td><td>Population standard deviation (÷ n), like QGIS's own tool</td></tr>
+      </tbody>
+    </table>
+    <h3>Categorical <span class="chip amber">🗺️</span></h3>
+    <table>
+      <thead><tr><th>Name</th><th>Meaning</th></tr></thead>
+      <tbody>
+        <tr><td><code>majority</code></td><td>Most common class (ties → lowest class code)</td></tr>
+        <tr><td><code>minority</code></td><td>Least common class (ties → lowest class code)</td></tr>
+        <tr><td><code>variety</code></td><td>Number of distinct classes present</td></tr>
+        <tr><td><code>count</code> / <code>nodata</code></td><td>Valid / nodata pixel counts</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="layouts">
+    <h2><span class="emoji">📋</span>Output layouts &amp; examples</h2>
+    <p>Every row of every layout begins with a unique <code>fid</code>.</p>
+
+    <h3><span class="chip blue">Continuous · Long</span> one row per polygon &amp; band</h3>
+    <div class="codewrap"><pre><span class="hl">fid,polygon_id,polygon_name,band_index,band_name,count,mean,stddev</span>
+<span class="fid">1</span>,101,North field,1,ndvi,4210,0.62,0.11
+<span class="fid">2</span>,101,North field,2,ndvi_may,4210,0.58,0.09
+<span class="fid">3</span>,102,South field,1,ndvi,3980,0.71,0.08</pre></div>
+
+    <h3><span class="chip blue">Continuous · Wide</span> one row per polygon, bands across columns</h3>
+    <div class="codewrap"><pre><span class="hl">fid,polygon_id,polygon_name,ndvi_mean,ndvi_stddev,ndvi_may_mean,ndvi_may_stddev</span>
+<span class="fid">1</span>,101,North field,0.62,0.11,0.58,0.09
+<span class="fid">2</span>,102,South field,0.71,0.08,0.66,0.07</pre></div>
+
+    <h3><span class="chip amber">Categorical · Summary</span> one row per polygon &amp; band</h3>
+    <div class="codewrap"><pre><span class="hl">fid,polygon_id,polygon_name,band_index,band_name,majority,minority,variety,count</span>
+<span class="fid">1</span>,101,North field,1,landcover,3,4,4,16
+<span class="fid">2</span>,102,South field,1,landcover,2,1,3,16</pre></div>
+
+    <h3><span class="chip violet">Categorical · Class breakdown</span> one row per polygon, band &amp; class</h3>
+    <div class="codewrap"><pre><span class="hl">fid,polygon_id,polygon_name,band_index,band_name,class,pixel_count,fraction</span>
+<span class="fid">1</span>,101,North field,1,landcover,1,4,0.250
+<span class="fid">2</span>,101,North field,1,landcover,2,4,0.250
+<span class="fid">3</span>,101,North field,1,landcover,3,5,0.312
+<span class="fid">4</span>,101,North field,1,landcover,4,3,0.188</pre></div>
+
+    <h3><span class="chip green">Categorical · Class counts (wide)</span> one column per class</h3>
+    <div class="codewrap"><pre><span class="hl">fid,polygon_id,polygon_name,band_index,band_name,class_1,class_2,class_3,class_4</span>
+<span class="fid">1</span>,101,North field,1,landcover,4,4,5,3
+<span class="fid">2</span>,102,South field,1,landcover,7,4,1,4</pre></div>
+    <p class="muted">Columns are the <b>union</b> of classes across all zones, so every row shares the
+       same columns — a class absent from a zone is simply <code>0</code>.</p>
+  </section>
+
+  <section id="bands">
+    <h2><span class="emoji">🏷️</span>Band names &amp; prefix / suffix</h2>
+    <div class="card">
+      <p style="margin-top:0">Output columns keep the raster's <b>own band names</b> (falling back to
+        <code>band_001</code>, <code>band_002</code>… when unnamed). Add an optional common
+        <b>prefix</b> and <b>suffix</b> to label a run of files:</p>
+      <table>
+        <thead><tr><th>Band name</th><th>Prefix</th><th>Suffix</th><th>Wide column (sanitised)</th></tr></thead>
+        <tbody>
+          <tr><td>NDVI</td><td><code>2020_</code></td><td>—</td><td><code>2020_ndvi_mean</code></td></tr>
+          <tr><td>Surface Temp</td><td>—</td><td>—</td><td><code>surface_temp_mean</code></td></tr>
+          <tr><td>band 1</td><td>—</td><td><code>_dry</code></td><td><code>band_1_dry_mean</code></td></tr>
+        </tbody>
+      </table>
+      <p style="margin-bottom:0" class="muted">Wide headers are lowercased with spaces/punctuation turned
+        into underscores; the raster's bands are never renamed.</p>
+    </div>
+  </section>
+
+  <section id="fid">
+    <h2><span class="emoji">🔑</span>The <code>fid</code> column &amp; decimal places</h2>
+    <div class="grid2">
+      <div class="card">
+        <h3 style="margin-top:0">🔑 Unique <code>fid</code></h3>
+        <p>Every row starts with a unique 1-based <code>fid</code> — a stable row identity. Handy
+           because <code>polygon_id</code> repeats across bands and classes, so it isn't a row key
+           on its own. Use <code>fid</code> for joins, database imports, or referencing a row.</p>
+      </div>
+      <div class="card">
+        <h3 style="margin-top:0">🔢 Decimal places</h3>
+        <p>Control the decimals of numeric cells. <b>Full precision</b> (the default) keeps every
+           digit; set <code>0–15</code> to fix the decimals — only floating-point cells (stats,
+           fraction) change; integers stay clean.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="crs">
+    <h2><span class="emoji">🧭</span>Coordinate systems</h2>
+    <div class="card">
+      <p style="margin-top:0">The <b>raster's CRS is the analysis CRS</b>, and the raster is never
+        resampled (that would fabricate pixel values). Zones are transformed into the raster CRS
+        automatically when they differ.</p>
+      <p style="margin-bottom:0">If a layer's CRS is missing or wrong, set a <b>Raster CRS</b> or
+        <b>Zones CRS</b> override. An override <em>assigns</em> a CRS (reinterprets coordinates) —
+        it does not reproject the data.</p>
+    </div>
+  </section>
+
+  <section id="tips">
+    <h2><span class="emoji">💡</span>Tips &amp; troubleshooting</h2>
+
+    <div class="callout tip">
+      <b>📊 Sums look like text in Excel (leading apostrophe)?</b>
+      That is a locale mismatch: the CSV uses a <code>.</code> decimal, but your Excel expects a
+      <code>,</code>. Use <b>Data → From Text/CSV</b> and set the decimal separator, or reduce the
+      output to a few <b>decimal places</b> for cleaner numbers.
+    </div>
+
+    <div class="callout warn">
+      <b>🚫 "More than 65,536 distinct values" error</b>
+      You ran <b>Categorical</b> mode on a continuous raster. Switch to Continuous, or reclassify
+      the raster into discrete classes first.
+    </div>
+
+    <div class="callout warn">
+      <b>🗂️ "Needs a file-based raster" error</b>
+      The engine reads the raster directly with GDAL. Export WMS/tiled/provider-only layers to
+      GeoTIFF first, then run the analysis on the export.
+    </div>
+
+    <div class="callout tip">
+      <b>🧩 Overlapping polygons</b>
+      Shared pixels are counted for <em>every</em> overlapping zone — overlaps are rasterized in
+      separate passes so no zone loses its pixels.
+    </div>
+
+    <h3>Advanced performance settings</h3>
+    <table>
+      <thead><tr><th>Setting</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td><b>Tile size</b></td><td>Raster window read at a time. Larger = fewer reads, more memory.</td></tr>
+        <tr><td><b>Band chunk</b></td><td>Bands held in memory per pass. Lower it for many-band rasters on tight memory.</td></tr>
+        <tr><td><b>All touched</b></td><td>Include every pixel a polygon touches, not just pixel centres (slower).</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <footer>
+    <p>Multiband Zonal Stats · v0.5.0<br>
+       Runs on QGIS 3.34 – 4.x. See <code>README.md</code> and <code>CHANGELOG.md</code> for more.</p>
+  </footer>
+
+</div>
+</body>
+</html>

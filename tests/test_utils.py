@@ -35,6 +35,13 @@ class NamingTests(unittest.TestCase):
             ["mean_value", "mean_value_2", "_9_lives", "field"],
         )
 
+    def test_header_names_keep_leading_digits_and_disambiguate(self):
+        # Unlike column names, CSV headers keep a leading digit (2020, not _2020).
+        self.assertEqual(
+            utils.unique_header_names(["2020_NDVI", "Surface Temp", "Surface Temp"]),
+            ["2020_ndvi", "surface_temp", "surface_temp_2"],
+        )
+
     def test_csv_extension_is_added(self):
         self.assertTrue(utils.safe_output_path("result").endswith("result.csv"))
 

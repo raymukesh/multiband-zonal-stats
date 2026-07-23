@@ -1,18 +1,19 @@
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
-from .algorithm import FastZonalStatisticsAlgorithm
+from .algorithm import CategoricalZonalStatisticsAlgorithm, FastZonalStatisticsAlgorithm
 
 
 class FastZonalStatsProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         self.addAlgorithm(FastZonalStatisticsAlgorithm())
+        self.addAlgorithm(CategoricalZonalStatisticsAlgorithm())
 
     def id(self):
         return "fastzonalstats"
 
     def name(self):
-        return self.tr("Fast Zonal Statistics")
+        return self.tr("Multiband Zonal Stats")
 
     def longName(self):
         return self.name()
