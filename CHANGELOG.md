@@ -2,6 +2,8 @@
 
 ## 0.5.0 — 2026-07-22
 
+- Rework the dialog into a two-column layout with a right-side **About** panel
+  (icon, name, version, a short how-to and author) read live from `metadata.txt`
 - Prepend a unique 1-based `fid` column to every output row, in all layouts, as
   a stable per-row identity (e.g. for joins or database imports)
 - Add an optional **Decimal places** control (dialog and both algorithms) that

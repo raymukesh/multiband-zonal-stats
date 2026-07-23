@@ -18,7 +18,7 @@ from qgis.gui import (
     QgsProjectionSelectionWidget,
 )
 from qgis.PyQt.QtCore import Qt, QUrl
-from qgis.PyQt.QtGui import QDesktopServices, QIcon, QPalette
+from qgis.PyQt.QtGui import QDesktopServices, QFont, QIcon, QPalette
 from qgis.PyQt.QtWidgets import (
     QAbstractItemView,
     QCheckBox,
@@ -71,8 +71,8 @@ class FastZonalStatsDialog(QDialog):
         self.output_path = None
         self.setWindowTitle(self.tr("Multiband Zonal Stats"))
         self.setWindowIcon(QIcon(str(Path(__file__).with_name("icon.svg"))))
-        self.setMinimumSize(520, 520)
-        self.resize(640, 700)
+        self.setMinimumSize(640, 540)
+        self.resize(820, 720)
         self.setModal(False)
         self._buildUi()
         self._connectSignals()
@@ -86,12 +86,6 @@ class FastZonalStatsDialog(QDialog):
         themes alike and matches the rest of the application.
         """
         root = QVBoxLayout(self)
-
-        description = QLabel(
-            self.tr("Process many polygons and raster bands into one tidy CSV — continuous or categorical.")
-        )
-        description.setWordWrap(True)
-        root.addWidget(description)
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
@@ -268,7 +262,13 @@ class FastZonalStatsDialog(QDialog):
 
         body_layout.addStretch(1)
         scroll.setWidget(body)
-        root.addWidget(scroll, 1)
+
+        # Two columns: the scrolling form on the left, a fixed About panel on the
+        # right, matching the layout most QGIS plugin dialogs use.
+        columns = QHBoxLayout()
+        columns.addWidget(scroll, 1)
+        columns.addWidget(self._buildAboutPanel())
+        root.addLayout(columns, 1)
 
         self.statusLabel = QLabel(self.tr("Ready"))
         self.progressBar = QProgressBar()
@@ -301,6 +301,82 @@ class FastZonalStatsDialog(QDialog):
         palette.setColor(ROLE_WINDOW_TEXT, palette.color(COLOR_GROUP_DISABLED, ROLE_WINDOW_TEXT))
         label.setPalette(palette)
         return label
+
+    def _separator(self):
+        line = QFrame()
+        line.setFrameShape(qt_enum(QFrame, "Shape", "HLine"))
+        line.setFrameShadow(qt_enum(QFrame, "Shadow", "Sunken"))
+        return line
+
+    def _readMetadata(self):
+        """Read the plugin's own metadata.txt so the About panel stays in sync."""
+        import configparser
+
+        parser = configparser.ConfigParser()
+        parser.optionxform = str  # metadata keys are not lowercased
+        try:
+            parser.read(Path(__file__).with_name("metadata.txt"), encoding="utf-8")
+            return dict(parser["general"])
+        except Exception:
+            return {}
+
+    def _buildAboutPanel(self):
+        """A fixed-width sidebar describing the plugin, read from metadata.txt."""
+        meta = self._readMetadata()
+        panel = QGroupBox(self.tr("About"))
+        panel.setMaximumWidth(260)
+        layout = QVBoxLayout(panel)
+
+        icon_path = Path(__file__).with_name("icon.svg")
+        if icon_path.exists():
+            icon_label = QLabel()
+            icon_label.setPixmap(QIcon(str(icon_path)).pixmap(48, 48))
+            layout.addWidget(icon_label)
+
+        title = QLabel(meta.get("name", "Multiband Zonal Stats"))
+        title.setWordWrap(True)
+        title_font = title.font()
+        title_font.setBold(True)
+        title_font.setPointSize(title_font.pointSize() + 2)
+        title.setFont(title_font)
+        layout.addWidget(title)
+
+        facts = []
+        if meta.get("version"):
+            facts.append(self.tr("Version {v}").format(v=meta["version"]))
+        if meta.get("qgisMinimumVersion"):
+            facts.append(self.tr("QGIS {v}+").format(v=meta["qgisMinimumVersion"]))
+        if facts:
+            layout.addWidget(self._hint("  •  ".join(facts)))
+
+        about_text = meta.get("about") or meta.get("description")
+        if about_text:
+            summary = QLabel(about_text)
+            summary.setWordWrap(True)
+            layout.addWidget(summary)
+
+        layout.addWidget(self._separator())
+
+        steps = QLabel(
+            self.tr(
+                "1. Pick the raster and polygon layers.\n"
+                "2. Choose the Continuous or Categorical tab to match your raster.\n"
+                "3. Select statistics and a layout.\n"
+                "4. Save the output CSV and run.\n\n"
+                "Every output row carries a unique fid."
+            )
+        )
+        steps.setWordWrap(True)
+        layout.addWidget(steps)
+
+        if meta.get("author"):
+            layout.addWidget(self._separator())
+            layout.addWidget(self._hint(self.tr("By {who}").format(who=meta["author"])))
+            if meta.get("email"):
+                layout.addWidget(self._hint(meta["email"]))
+
+        layout.addStretch(1)
+        return panel
 
     def _makeStatsList(self, names, friendly):
         """A checkable list whose items carry their statistic index in USER_ROLE."""

@@ -51,7 +51,9 @@ The graphical dialog provides:
   active tab is the analysis mode, each with its own statistics list and layout;
 - output file selection;
 - tile size, band chunk size, and all-touched advanced options;
-- background progress, safe cancellation, and result opening.
+- background progress, safe cancellation, and result opening;
+- a right-side **About** panel summarising the plugin (name, version, author and
+  a short how-to), read live from `metadata.txt`.
 
 ## Analysis modes, statistics and output
 
