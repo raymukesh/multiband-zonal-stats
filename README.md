@@ -97,7 +97,7 @@ the legacy one.
 
 ## Install for development
 
-1. Rename or copy this directory to `fast_multiband_zonal_stats` inside the QGIS
+1. Rename or copy this directory to `multiband_zonal_stats` inside the QGIS
    user profile's `python/plugins` directory.
 2. Restart QGIS or reload plugins.
 3. Enable **Multiband Zonal Stats** in Plugin Manager.

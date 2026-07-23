@@ -11,7 +11,7 @@ from zipfile import ZIP_DEFLATED, ZipFile
 
 
 ROOT = Path(__file__).resolve().parents[1]
-PLUGIN_NAME = "fast_multiband_zonal_stats"
+PLUGIN_NAME = "multiband_zonal_stats"
 
 # Everything QGIS needs at runtime. Tests, packaging scripts and VCS metadata
 # are deliberately excluded.

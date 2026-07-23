@@ -155,7 +155,7 @@ the all-touched option cannot lose a boundary pixel to label overwriting.
 | `scripts/build_package.py` | Reproducible installable ZIP builder (derives file list and version) |
 
 The repository root is the plugin source root. The packaging script places these
-files under the required `fast_multiband_zonal_stats/` directory inside the ZIP.
+files under the required `multiband_zonal_stats/` directory inside the ZIP.
 
 ## Compatibility decisions
 

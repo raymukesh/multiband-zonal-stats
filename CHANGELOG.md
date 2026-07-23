@@ -2,10 +2,11 @@
 
 ## 0.5.0 — 2026-07-22
 
-- Rename the plugin's display name to **Multiband Zonal Stats** (menus, dialog,
-  Processing group and algorithm titles). The internal identifiers — package
-  folder, provider id `fastzonalstats` and the algorithm ids — are unchanged, so
-  existing Processing models keep working
+- Rename the plugin's display name to **Multiband Zonal Stats** across menus, the
+  dialog, and the Processing group and algorithm titles, and rename the packaged
+  plugin folder/zip to `multiband_zonal_stats`. The provider id `fastzonalstats`
+  and the algorithm ids are unchanged, so existing Processing models keep working
+- Set the plugin author to Mukesh Ray (dr.raymukesh@gmail.com) in the metadata
 - Add categorical (discrete-class) analysis as a second Processing algorithm,
   *Multiband zonal stats (categorical)*, and a matching **Categorical
   raster** tab in the dialog. It reports the majority, minority and variety
