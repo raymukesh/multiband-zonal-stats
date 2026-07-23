@@ -53,7 +53,8 @@ The graphical dialog provides:
 - tile size, band chunk size, and all-touched advanced options;
 - background progress, safe cancellation, and result opening;
 - a right-side **About** panel summarising the plugin (name, version, author and
-  a short how-to), read live from `metadata.txt`.
+  a short how-to), read live from `metadata.txt`;
+- a **Help** button that opens the bundled `help.html` in the default browser.
 
 ## Analysis modes, statistics and output
 
@@ -153,6 +154,7 @@ the all-touched option cannot lose a boundary pixel to label overwriting.
 | `compat.py` | Qt5/Qt6 and QGIS 3/4 compatibility shims (scoped enums, relocated classes) |
 | `metadata.txt` | QGIS Plugin Manager metadata and version |
 | `icon.svg` | Plugin and toolbar icon |
+| `help.html` | Self-contained help page opened by the dialog's Help button |
 | `tests/test_utils.py` | Pure-Python parsing and naming tests |
 | `tests/test_engine_helpers.py` | Tile and overlap-pass helper tests |
 | `tests/test_engine_integration.py` | GDAL-backed continuous engine tests |

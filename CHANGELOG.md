@@ -2,6 +2,9 @@
 
 ## 0.5.0 — 2026-07-22
 
+- Add a **Help** button (bottom-left of the dialog) that opens a bundled, richly
+  formatted `help.html` in the browser — modes, statistics, layouts with example
+  CSVs, band naming, and troubleshooting
 - Rework the dialog into a two-column layout with a right-side **About** panel
   (icon, name, version, a short how-to and author) read live from `metadata.txt`
 - Prepend a unique 1-based `fid` column to every output row, in all layouts, as
