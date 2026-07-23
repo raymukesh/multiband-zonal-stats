@@ -1,22 +1,12 @@
-import importlib.util
 import sys
-import types
 import unittest
 from pathlib import Path
 
+# Works whether this file is run directly or discovered as tests.<module>.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from plugin_modules import load  # noqa: E402
 
-ROOT = Path(__file__).resolve().parents[1]
-PACKAGE = types.ModuleType("fast_zonal_testpkg")
-PACKAGE.__path__ = [str(ROOT)]
-sys.modules[PACKAGE.__name__] = PACKAGE
-for module_name in ("utils", "engine"):
-    spec = importlib.util.spec_from_file_location(
-        f"{PACKAGE.__name__}.{module_name}", ROOT / f"{module_name}.py"
-    )
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[spec.name] = module
-    spec.loader.exec_module(module)
-engine = sys.modules[f"{PACKAGE.__name__}.engine"]
+_, engine = load()
 
 
 class OverlapPassTests(unittest.TestCase):
@@ -43,17 +33,6 @@ class OverlapPassTests(unittest.TestCase):
         # North-up 100x100 raster, 1 map unit pixels, 20px tiles.
         candidates = engine._candidate_tiles(zones, (0, 1, 0, 100, 0, -1), 100, 100, 20)
         self.assertEqual(set(candidates), {(0, 0), (1, 0), (0, 1), (1, 1)})
-
-    def test_projected_pixel_area_honours_linear_units(self):
-        class FakeSrs:
-            def IsProjected(self):
-                return True
-
-            def GetLinearUnits(self):
-                return 0.3048  # feet to metres
-
-        area = engine._pixel_area_m2(FakeSrs(), (0, 10, 0, 0, 0, -20))
-        self.assertAlmostEqual(area, 200 * 0.3048**2)
 
 
 if __name__ == "__main__":

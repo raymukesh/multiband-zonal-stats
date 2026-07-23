@@ -8,7 +8,16 @@ from typing import Iterable
 
 
 STATISTICS = ("count", "nodata", "min", "max", "sum", "mean", "stddev")
-AREA_UNITS = ("pixels", "m2", "km2", "ha", "acres")
+OUTPUT_FORMATS = ("long", "wide")
+
+# Categorical (discrete-class) analysis. "majority"/"minority" are the most and
+# least common class in a zone; "variety" is the number of distinct classes.
+CATEGORICAL_STATISTICS = ("majority", "minority", "variety", "count", "nodata")
+# "summary": one row per zone+band. "breakdown": one row per zone+band+class.
+# "counts": one row per zone+band with one pixel-count column per class.
+CATEGORICAL_LAYOUTS = ("summary", "breakdown", "counts")
+
+ANALYSIS_MODES = ("continuous", "categorical")
 
 
 def parse_band_selection(text: str, band_count: int) -> list[int]:
@@ -92,6 +101,28 @@ def unique_names(names: Iterable[str]) -> list[str]:
     result = []
     for raw_name in names:
         name = clean_column_name(raw_name)
+        seen[name] = seen.get(name, 0) + 1
+        result.append(name if seen[name] == 1 else f"{name}_{seen[name]}")
+    return result
+
+
+def clean_header_name(value: str, fallback: str = "band") -> str:
+    """Spreadsheet-safe CSV header: lowercase, non-alphanumerics to underscores.
+
+    Unlike :func:`clean_column_name` this keeps a leading digit (a CSV header is
+    not an identifier), so a band called ``2020`` stays ``2020`` rather than
+    gaining an underscore.
+    """
+    cleaned = re.sub(r"[^0-9A-Za-z_]+", "_", value.strip()).strip("_").lower()
+    return cleaned or fallback
+
+
+def unique_header_names(names: Iterable[str]) -> list[str]:
+    """Sanitise band labels into CSV headers, disambiguating any collisions."""
+    seen: dict[str, int] = {}
+    result = []
+    for raw_name in names:
+        name = clean_header_name(raw_name)
         seen[name] = seen.get(name, 0) + 1
         result.append(name if seen[name] == 1 else f"{name}_{seen[name]}")
     return result

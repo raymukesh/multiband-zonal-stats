@@ -1,12 +1,13 @@
 from qgis.core import QgsProcessingProvider
 from qgis.PyQt.QtGui import QIcon
 
-from .algorithm import FastZonalStatisticsAlgorithm
+from .algorithm import CategoricalZonalStatisticsAlgorithm, FastZonalStatisticsAlgorithm
 
 
 class FastZonalStatsProvider(QgsProcessingProvider):
     def loadAlgorithms(self):
         self.addAlgorithm(FastZonalStatisticsAlgorithm())
+        self.addAlgorithm(CategoricalZonalStatisticsAlgorithm())
 
     def id(self):
         return "fastzonalstats"

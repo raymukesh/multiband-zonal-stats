@@ -2,8 +2,8 @@ from pathlib import Path
 
 from qgis.core import QgsApplication
 from qgis.PyQt.QtGui import QIcon
-from qgis.PyQt.QtWidgets import QAction
 
+from .compat import QAction
 from .provider import FastZonalStatsProvider
 
 
