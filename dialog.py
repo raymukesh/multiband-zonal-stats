@@ -37,6 +37,7 @@ from qgis.PyQt.QtWidgets import (
     QPushButton,
     QScrollArea,
     QSpinBox,
+    QSplitter,
     QTabWidget,
     QVBoxLayout,
     QWidget,
@@ -262,13 +263,20 @@ class FastZonalStatsDialog(QDialog):
 
         body_layout.addStretch(1)
         scroll.setWidget(body)
+        scroll.setMinimumWidth(380)
 
-        # Two columns: the scrolling form on the left, a fixed About panel on the
-        # right, matching the layout most QGIS plugin dialogs use.
-        columns = QHBoxLayout()
-        columns.addWidget(scroll, 1)
-        columns.addWidget(self._buildAboutPanel())
-        root.addLayout(columns, 1)
+        # A draggable splitter separates the scrolling form (left) from the About
+        # panel (right): the handle both spaces the two apart and lets the user
+        # rebalance them. Neither side may be collapsed to nothing.
+        splitter = QSplitter(qt_enum(Qt, "Orientation", "Horizontal"))
+        splitter.setChildrenCollapsible(False)
+        splitter.setHandleWidth(10)
+        splitter.addWidget(scroll)
+        splitter.addWidget(self._buildAboutPanel())
+        splitter.setStretchFactor(0, 1)  # the form takes the extra width
+        splitter.setStretchFactor(1, 0)  # the About panel keeps its size
+        splitter.setSizes([560, 260])
+        root.addWidget(splitter, 1)
 
         self.statusLabel = QLabel(self.tr("Ready"))
         self.progressBar = QProgressBar()
@@ -326,7 +334,7 @@ class FastZonalStatsDialog(QDialog):
         """A fixed-width sidebar describing the plugin, read from metadata.txt."""
         meta = self._readMetadata()
         panel = QGroupBox(self.tr("About"))
-        panel.setMaximumWidth(260)
+        panel.setMinimumWidth(210)
         layout = QVBoxLayout(panel)
 
         icon_path = Path(__file__).with_name("icon.svg")
@@ -370,12 +378,6 @@ class FastZonalStatsDialog(QDialog):
         )
         steps.setWordWrap(True)
         layout.addWidget(steps)
-
-        if meta.get("author"):
-            layout.addWidget(self._separator())
-            layout.addWidget(self._hint(self.tr("By {who}").format(who=meta["author"])))
-            if meta.get("email"):
-                layout.addWidget(self._hint(meta["email"]))
 
         layout.addStretch(1)
         return panel

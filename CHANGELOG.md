@@ -6,7 +6,8 @@
   formatted `help.html` in the browser — modes, statistics, layouts with example
   CSVs, band naming, and troubleshooting
 - Rework the dialog into a two-column layout with a right-side **About** panel
-  (icon, name, version, a short how-to and author) read live from `metadata.txt`
+  (icon, name, version and a short how-to, read live from `metadata.txt`),
+  separated from the form by a draggable splitter
 - Prepend a unique 1-based `fid` column to every output row, in all layouts, as
   a stable per-row identity (e.g. for joins or database imports)
 - Add an optional **Decimal places** control (dialog and both algorithms) that
