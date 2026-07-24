@@ -46,6 +46,8 @@ The graphical dialog provides:
   (`Raster CRS` / `Zones CRS`) for layers whose declared CRS is missing or wrong;
 - polygon ID and name field selectors;
 - live validation of band expressions such as `all`, `1-8`, or `1,3,7`;
+- an **Exclude values** field to drop specific pixel values (extra nodata),
+  e.g. 0 for out-of-boundary in categorical rasters;
 - an optional band-name **prefix** and **suffix** applied to output labels;
 - two mode tabs — **Continuous raster** and **Categorical raster** — where the
   active tab is the analysis mode, each with its own statistics list and layout;
@@ -54,7 +56,10 @@ The graphical dialog provides:
 - background progress, safe cancellation, and result opening;
 - a right-side **About** panel summarising the plugin (name, version, author and
   a short how-to), read live from `metadata.txt`;
-- a **Help** button that opens the bundled `help.html` in the default browser.
+- a **Help** button that opens the bundled `help.html` in the default browser;
+- a **Histogram…** button that previews a band's distribution (continuous bins
+  or categorical class counts) in a QPainter popup, via `engine.raster_histogram`
+  (whole raster, read decimated for speed; ignores the polygons).
 
 ## Analysis modes, statistics and output
 
@@ -150,6 +155,7 @@ the all-touched option cannot lose a boundary pixel to label overwriting.
 | `algorithm.py` | Shared base algorithm plus the continuous and categorical subclasses (parameters, feature prep, CRS transform, feedback) |
 | `engine.py` | QGIS-independent GDAL/NumPy tile engine; shared masked-pixel generator, continuous and categorical writers, atomic CSV |
 | `dialog.py` | Graphical workflow with Continuous/Categorical tabs and a background `QgsProcessingAlgRunnerTask` |
+| `histogram.py` | Dependency-free QPainter histogram popup for the dialog's band-distribution preview |
 | `utils.py` | Dependency-free band parsing, naming/header sanitizing, statistics and layout constants, path helpers |
 | `compat.py` | Qt5/Qt6 and QGIS 3/4 compatibility shims (scoped enums, relocated classes) |
 | `metadata.txt` | QGIS Plugin Manager metadata and version |

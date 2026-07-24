@@ -46,6 +46,9 @@ class EngineOptions:
     # Round floating-point cells to this many decimals in the CSV. None keeps the
     # full-precision repr (the default); a non-negative int fixes the decimals.
     decimal_places: int | None = None
+    # Extra pixel values to treat as nodata (dropped from every band), on top of
+    # whatever the raster declares — e.g. a categorical 0 for out-of-boundary.
+    extra_nodata: Sequence[float] = ()
     # "continuous" reduces each zone to numeric statistics; "categorical" builds
     # a per-zone class histogram (majority, minority, variety, class breakdown).
     mode: str = "continuous"
@@ -200,8 +203,12 @@ def _merge_variance(np, mean_row, m2_row, existing_count, tile_count, tile_sum, 
     mean_row[merge] += delta * (weight_b / combined)
 
 
-def _valid_mask(np, values, nodata):
-    """Return the finite, non-nodata mask for one band's window values."""
+def _valid_mask(np, values, nodata, extra=None):
+    """Return the finite, non-nodata mask for one band's window values.
+
+    ``extra`` is an optional list of user-supplied values (e.g. a categorical 0
+    for out-of-boundary) to drop in addition to the band's declared nodata.
+    """
     if np.issubdtype(values.dtype, np.floating):
         valid = np.isfinite(values)
     else:
@@ -209,7 +216,100 @@ def _valid_mask(np, values, nodata):
         valid = np.ones(values.shape, dtype=bool)
     if nodata is not None:
         valid &= values != nodata
+    if extra:
+        valid &= ~np.isin(values, extra)
     return valid
+
+
+def raster_histogram(
+    raster_path: str,
+    band: int,
+    *,
+    categorical: bool = False,
+    bins: int = 50,
+    max_cells: int = 2_000_000,
+    max_classes: int = 50,
+) -> dict:
+    """Summarise the distribution of one raster band for a quick preview.
+
+    The band is read decimated to at most ``max_cells`` pixels (GDAL resamples on
+    read) so even large rasters return promptly; nodata and non-finite values are
+    dropped. This ignores any polygons — it describes the raster itself.
+
+    Returns a dict with ``categorical`` plus, for continuous bands,
+    ``counts``/``edges`` and min/max/mean/stddev; for categorical bands,
+    ``classes`` (a list of ``(class, count)`` sorted by class code), ``variety``
+    and ``majority``. ``truncated`` is True when more classes exist than shown.
+    """
+    from osgeo import gdal
+    import numpy as np
+
+    dataset = gdal.Open(raster_path, gdal.GA_ReadOnly)
+    if dataset is None:
+        raise ValueError(f"GDAL could not open raster: {raster_path}")
+    if band < 1 or band > dataset.RasterCount:
+        raise ValueError(f"Band {band} is outside the available range 1–{dataset.RasterCount}.")
+
+    raster_band = dataset.GetRasterBand(band)
+    width, height = dataset.RasterXSize, dataset.RasterYSize
+    total = width * height
+    # Decimate to a bounded number of cells; GDAL resamples during the read.
+    if total > max_cells and total > 0:
+        scale = (max_cells / total) ** 0.5
+        buf_x = max(1, int(width * scale))
+        buf_y = max(1, int(height * scale))
+    else:
+        buf_x, buf_y = width, height
+    # Read nodata before the dataset is released; the band handle dies with it.
+    nodata = raster_band.GetNoDataValue()
+    values = raster_band.ReadAsArray(buf_xsize=buf_x, buf_ysize=buf_y)
+    dataset = None
+    if values is None:
+        raise ValueError("GDAL could not read the raster band.")
+
+    values = values.ravel()
+    values = values[_valid_mask(np, values, nodata)]
+
+    result = {
+        "band": band,
+        "categorical": categorical,
+        "sampled": buf_x * buf_y,
+        "total_pixels": total,
+        "valid": int(values.size),
+    }
+    if values.size == 0:
+        return result
+
+    if categorical:
+        if np.issubdtype(values.dtype, np.floating):
+            codes = np.rint(values).astype(np.int64)
+        else:
+            codes = values.astype(np.int64, copy=False)
+        unique, counts = np.unique(codes, return_counts=True)
+        result["variety"] = int(unique.size)
+        result["majority"] = int(unique[int(np.argmax(counts))])
+        if unique.size > max_classes:
+            # Keep the most common classes, then restore class-code order.
+            top = np.argsort(counts)[::-1][:max_classes]
+            keep = np.sort(top)
+            unique, counts = unique[keep], counts[keep]
+            result["truncated"] = True
+        else:
+            result["truncated"] = False
+        result["classes"] = list(zip(unique.tolist(), counts.tolist()))
+    else:
+        vmin, vmax = float(values.min()), float(values.max())
+        if vmax <= vmin:
+            # A flat band would give zero-width bins; widen it a touch.
+            vmax = vmin + 1.0
+        counts, edges = np.histogram(values, bins=max(1, int(bins)), range=(vmin, vmax))
+        result["counts"] = counts.tolist()
+        result["edges"] = edges.tolist()
+        result["min"] = float(values.min())
+        result["max"] = float(values.max())
+        result["mean"] = float(values.mean())
+        result["stddev"] = float(values.std())
+    return result
 
 
 # A categorical raster with a runaway number of distinct values is almost always
@@ -220,7 +320,7 @@ MAX_CATEGORICAL_CLASSES = 65536
 
 def _iter_masked_pixels(
     np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-    band_position, nodata_by_band, slots, need_covered, all_touched,
+    band_position, nodata_by_band, extra_nodata, slots, need_covered, all_touched,
     is_cancelled, progress,
 ):
     """Yield ``(row, ids, values, base_covered)`` for each (window, group, band).
@@ -277,7 +377,7 @@ def _iter_masked_pixels(
                 for local_index, band_index in enumerate(band_chunk):
                     row = band_position[band_index]
                     values = data[local_index][inside]
-                    valid = _valid_mask(np, values, nodata_by_band[band_index])
+                    valid = _valid_mask(np, values, nodata_by_band[band_index], extra_nodata)
                     if valid.all():
                         yield row, label_values, values, base_covered
                     else:
@@ -343,7 +443,7 @@ def _write_continuous(
 
     for row, ids, raw_vals, base_covered in _iter_masked_pixels(
         np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-        band_position, nodata_by_band, slots, need_nodata, options.all_touched,
+        band_position, nodata_by_band, options.extra_nodata, slots, need_nodata, options.all_touched,
         is_cancelled, progress,
     ):
         if need_nodata:
@@ -461,7 +561,7 @@ def _write_categorical(
 
     for row, ids, raw_vals, base_covered in _iter_masked_pixels(
         np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-        band_position, nodata_by_band, slots, need_nodata, options.all_touched,
+        band_position, nodata_by_band, options.extra_nodata, slots, need_nodata, options.all_touched,
         is_cancelled, progress,
     ):
         if need_nodata:

@@ -72,6 +72,24 @@ def parse_statistics(values: Iterable[str] | str) -> list[str]:
     return result
 
 
+def parse_exclude_values(text: str | None) -> list[float]:
+    """Parse a comma-separated list of pixel values to treat as extra nodata.
+
+    Empty input yields an empty list. Values are kept as floats so they match
+    both integer class codes and floating-point sentinels.
+    """
+    values: list[float] = []
+    for token in (text or "").split(","):
+        token = token.strip()
+        if not token:
+            continue
+        try:
+            values.append(float(token))
+        except ValueError:
+            raise ValueError(f"Invalid value to exclude: {token!r}")
+    return values
+
+
 def safe_band_name(description: str | None, band_index: int) -> str:
     name = (description or "").strip()
     return name if name else f"band_{band_index:03d}"

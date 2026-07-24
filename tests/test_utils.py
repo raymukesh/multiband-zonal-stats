@@ -46,6 +46,19 @@ class NamingTests(unittest.TestCase):
         self.assertTrue(utils.safe_output_path("result").endswith("result.csv"))
 
 
+class ExcludeValueTests(unittest.TestCase):
+    def test_parses_a_comma_separated_list(self):
+        self.assertEqual(utils.parse_exclude_values("0, 255"), [0.0, 255.0])
+
+    def test_blank_is_empty(self):
+        self.assertEqual(utils.parse_exclude_values(""), [])
+        self.assertEqual(utils.parse_exclude_values("  ,  "), [])
+
+    def test_bad_token_is_rejected(self):
+        with self.assertRaisesRegex(ValueError, "exclude"):
+            utils.parse_exclude_values("0, oops")
+
+
 if __name__ == "__main__":
     unittest.main()
 

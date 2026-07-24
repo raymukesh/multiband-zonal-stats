@@ -34,6 +34,7 @@ from .utils import (
     OUTPUT_FORMATS,
     STATISTICS,
     parse_band_selection,
+    parse_exclude_values,
     safe_output_path,
 )
 
@@ -53,6 +54,7 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
     ID_FIELD = "ID_FIELD"
     NAME_FIELD = "NAME_FIELD"
     BANDS = "BANDS"
+    EXCLUDE_VALUES = "EXCLUDE_VALUES"
     BAND_PREFIX = "BAND_PREFIX"
     BAND_SUFFIX = "BAND_SUFFIX"
     STATS = "STATS"
@@ -129,6 +131,14 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
                 defaultValue="all",
             )
         )
+        self.addParameter(
+            QgsProcessingParameterString(
+                self.EXCLUDE_VALUES,
+                self.tr("Exclude pixel values, treated as nodata (e.g. 0, 255)"),
+                defaultValue="",
+                optional=True,
+            )
+        )
         # Optional text wrapped around every band name in the output. The
         # raster's bands are never renamed; only the CSV labels change.
         prefix = QgsProcessingParameterString(
@@ -202,6 +212,10 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
 
     def _executionKwargs(self, parameters, context):
         places = self.parameterAsInt(parameters, self.DECIMAL_PLACES, context)
+        try:
+            exclude = parse_exclude_values(self.parameterAsString(parameters, self.EXCLUDE_VALUES, context))
+        except ValueError as error:
+            raise QgsProcessingException(str(error)) from error
         return dict(
             all_touched=self.parameterAsBool(parameters, self.ALL_TOUCHED, context),
             tile_size=self.parameterAsInt(parameters, self.TILE_SIZE, context),
@@ -209,6 +223,7 @@ class _BaseZonalStatisticsAlgorithm(QgsProcessingAlgorithm):
             band_prefix=self.parameterAsString(parameters, self.BAND_PREFIX, context) or "",
             band_suffix=self.parameterAsString(parameters, self.BAND_SUFFIX, context) or "",
             decimal_places=None if places < 0 else places,
+            extra_nodata=tuple(exclude),
         )
 
     # --- processing ------------------------------------------------------

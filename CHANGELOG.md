@@ -2,6 +2,12 @@
 
 ## 0.5.0 — 2026-07-22
 
+- Add an **Exclude values** input (dialog and both algorithms) that drops
+  specific pixel values from the calculation as extra nodata — e.g. `0` for
+  out-of-boundary in categorical rasters — on top of the raster's declared nodata
+- Add a **Histogram…** button that previews a raster band's distribution in a
+  popup — binned values (continuous) or class counts (categorical), drawn with
+  QPainter (no extra dependencies) and read decimated for speed
 - Add a **Help** button (bottom-left of the dialog) that opens a bundled, richly
   formatted `help.html` in the browser — modes, statistics, layouts with example
   CSVs, band naming, and troubleshooting
