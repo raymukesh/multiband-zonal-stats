@@ -1,0 +1,89 @@
+site_name: Multiband Zonal Stats
+site_description: A QGIS Processing plugin for tidy zonal-statistics CSVs from multiband rasters and polygon layers
+site_author: Mukesh Ray
+site_url: https://raymukesh.github.io/multiband-zonal-stats/
+
+repo_name: multiband-zonal-stats
+repo_url: https://github.com/raymukesh/multiband-zonal-stats
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: amber
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.top
+    - navigation.footer
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.copy
+  icon:
+    repo: fontawesome/brands/github
+  logo: assets/icon.png
+  favicon: assets/icon.png
+
+plugins:
+  - search
+  - minify:
+      minify_html: true
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets:
+      base_path:
+        - .
+        - docs
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: installation.md
+    - Quick Start: getting-started.md
+  - User Guide:
+    - Features: features.md
+    - Continuous & Categorical: modes.md
+    - Output & Options: output.md
+  - Reference:
+    - Changelog: changelog.md
+    - FAQ: faq.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/raymukesh/multiband-zonal-stats
+  generator: false
+
+copyright: Copyright &copy; 2026 Mukesh Ray

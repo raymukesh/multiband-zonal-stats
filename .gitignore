@@ -6,3 +6,6 @@ __pycache__/
 dist/
 *.zip
 
+# MkDocs build output
+site/
+
