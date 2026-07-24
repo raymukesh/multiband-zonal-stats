@@ -1,7 +1,7 @@
 [general]
 name=Multiband Zonal Stats
 description=High-throughput continuous and categorical zonal statistics for multiband rasters and multipart polygon layers.
-about=Processes rasters in bounded, block-aligned windows and aggregates many polygons and bands into a tidy CSV without repeatedly reading the raster for every feature. Handles both continuous rasters (mean, sum, standard deviation) and categorical rasters (majority, minority, variety, per-class breakdown).
+about=A QGIS Processing plugin for producing tidy zonal-statistics CSV files from multiband rasters and polygon or multipolygon layers. It is purpose-built for multiband rasters, processing every band in one pass — something QGIS's own zonal-statistics tools do not do.
 version=0.5.0
 qgisMinimumVersion=3.34
 qgisMaximumVersion=4.99
