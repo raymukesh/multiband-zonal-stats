@@ -13,6 +13,13 @@
 
 Instead of re-reading the raster once per polygon (the slow, classic pattern), it reads the raster in **bounded tiles** and aggregates every zone and band together with NumPy — so the work scales with the raster area touched, not with *polygons × bands*.
 
+## See it in action
+
+<div align="center">
+  <img src="assets/screenshot.png" alt="The Multiband Zonal Stats dialog in QGIS" width="640">
+  <p><em>The dialog: continuous/categorical tabs, exclude values, decimal places, a live histogram preview, and an About panel.</em></p>
+</div>
+
 ## Key features
 
 <div class="grid cards" markdown>
