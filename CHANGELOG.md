@@ -4,6 +4,9 @@
 
 - Mark the plugin as stable (`experimental=False`) and complete the metadata for
   the QGIS plugin repository: `repository`, `tracker` and `homepage` URLs
+- Remove the obsolete `supportsQt6` metadata flag (no longer recognised by QGIS);
+  QGIS 4 readiness is declared via `qgisMaximumVersion=4.99`, and the code already
+  uses the `qgis.PyQt` shim with no Qt5-only APIs
 - Add an **Exclude values** input (dialog and both algorithms) that drops
   specific pixel values from the calculation as extra nodata — e.g. `0` for
   out-of-boundary in categorical rasters — on top of the raster's declared nodata
