@@ -46,6 +46,8 @@ The graphical dialog provides:
   (`Raster CRS` / `Zones CRS`) for layers whose declared CRS is missing or wrong;
 - polygon ID and name field selectors;
 - live validation of band expressions such as `all`, `1-8`, or `1,3,7`;
+- an **Exclude values** field to drop specific pixel values (extra nodata),
+  e.g. 0 for out-of-boundary in categorical rasters;
 - an optional band-name **prefix** and **suffix** applied to output labels;
 - two mode tabs — **Continuous raster** and **Categorical raster** — where the
   active tab is the analysis mode, each with its own statistics list and layout;

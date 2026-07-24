@@ -213,6 +213,18 @@ class CategoricalEngineTests(unittest.TestCase):
         finally:
             engine.MAX_CATEGORICAL_CLASSES = original
 
+    def test_extra_nodata_excludes_a_class(self):
+        values = np.array([[0, 0, 1, 1], [0, 0, 1, 1], [2, 2, 2, 3], [2, 2, 3, 3]], dtype=np.int32)
+        raster = build_raster(self.folder / "withzero.tif", values)  # 0->4, 1->4, 2->5, 3->3
+        rows = run(
+            raster, self.full_zone(),
+            ["count", "variety", "majority"], output_format="summary", extra_nodata=(0,),
+        )
+        row = rows[0]
+        self.assertEqual(int(row["count"]), 12)     # the four class-0 pixels dropped
+        self.assertEqual(int(row["variety"]), 3)    # classes 1, 2, 3 remain
+        self.assertEqual(int(row["majority"]), 2)
+
     def test_raster_histogram_categorical(self):
         hist = engine.raster_histogram(self.classes_raster(), 1, categorical=True)
         self.assertTrue(hist["categorical"])

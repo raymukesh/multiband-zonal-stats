@@ -363,6 +363,13 @@
     </div>
 
     <div class="callout tip">
+      <b>🚫 Excluding values (extra nodata)</b>
+      Type values into <b>Exclude values</b> to drop them from the calculation, just like nodata —
+      comma-separated, e.g. <code>0, 255</code>. Handy for categorical rasters where <code>0</code>
+      marks out-of-boundary pixels. Open the <b>Histogram</b> first to spot which value to exclude.
+    </div>
+
+    <div class="callout tip">
       <b>🧩 Overlapping polygons</b>
       Shared pixels are counted for <em>every</em> overlapping zone — overlaps are rasterized in
       separate passes so no zone loses its pixels.

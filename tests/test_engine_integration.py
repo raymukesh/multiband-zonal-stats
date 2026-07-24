@@ -304,6 +304,14 @@ class EngineIntegrationTests(unittest.TestCase):
                     self.two_band_raster(), self.overlapping_zones(), str(Path(folder) / "x.csv"), options
                 )
 
+    def test_extra_nodata_excludes_pixels(self):
+        raster = self.two_band_raster()  # band 1 holds values 1..16
+        full = [zone(1, "POLYGON ((0 0, 4 0, 4 4, 0 4, 0 0))", "z")]
+        rows = run(raster, full, ["count", "min", "sum"], bands=[1], extra_nodata=(1.0,))
+        self.assertEqual(int(rows[0]["count"]), 15)  # the single value-1 pixel dropped
+        self.assertAlmostEqual(float(rows[0]["min"]), 2.0)
+        self.assertAlmostEqual(float(rows[0]["sum"]), sum(range(2, 17)))
+
     def test_raster_histogram_continuous(self):
         raster = self.two_band_raster()  # band 1 holds values 1..16
         hist = engine.raster_histogram(raster, 1, categorical=False, bins=4)

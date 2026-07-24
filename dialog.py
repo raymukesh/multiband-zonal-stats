@@ -45,7 +45,13 @@ from qgis.PyQt.QtWidgets import (
 )
 
 from .compat import file_widget_storage_mode, layer_filter, qt_enum
-from .utils import CATEGORICAL_STATISTICS, STATISTICS, parse_band_selection, safe_output_path
+from .utils import (
+    CATEGORICAL_STATISTICS,
+    STATISTICS,
+    parse_band_selection,
+    parse_exclude_values,
+    safe_output_path,
+)
 
 
 FRAME_NO_FRAME = qt_enum(QFrame, "Shape", "NoFrame")
@@ -154,6 +160,12 @@ class FastZonalStatsDialog(QDialog):
         affix_box.addWidget(self.bandPrefix)
         affix_box.addWidget(self.bandSuffix)
         analysis_form.addRow(self.tr("Band name prefix / suffix"), affix_box)
+
+        # Extra pixel values to drop from the calculation, like nodata. Common
+        # for categorical rasters where 0 marks out-of-boundary pixels.
+        self.excludeEdit = QLineEdit()
+        self.excludeEdit.setPlaceholderText(self.tr("e.g. 0, 255 — treated as nodata"))
+        analysis_form.addRow(self.tr("Exclude values"), self.excludeEdit)
 
         # A tab per raster kind so the user commits to one before choosing
         # statistics: continuous rasters carry measured values, categorical
@@ -541,6 +553,7 @@ class FastZonalStatsDialog(QDialog):
         if not polygons:
             raise ValueError(self.tr("Choose a polygon layer."))
         parse_band_selection(self.bandEdit.text(), raster.bandCount())
+        parse_exclude_values(self.excludeEdit.text())
         if self._isCategorical():
             # The class breakdown layout does not use the statistic selection.
             if self.catFormatCombo.currentIndex() == 0 and not self._selectedCatStats():
@@ -575,6 +588,7 @@ class FastZonalStatsDialog(QDialog):
             "ID_FIELD": self.idField.currentField(),
             "NAME_FIELD": self.nameField.currentField(),
             "BANDS": self.bandEdit.text(),
+            "EXCLUDE_VALUES": self.excludeEdit.text(),
             "BAND_PREFIX": self.bandPrefix.text(),
             "BAND_SUFFIX": self.bandSuffix.text(),
             "STATS": stats,

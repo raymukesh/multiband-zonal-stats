@@ -46,6 +46,9 @@ class EngineOptions:
     # Round floating-point cells to this many decimals in the CSV. None keeps the
     # full-precision repr (the default); a non-negative int fixes the decimals.
     decimal_places: int | None = None
+    # Extra pixel values to treat as nodata (dropped from every band), on top of
+    # whatever the raster declares — e.g. a categorical 0 for out-of-boundary.
+    extra_nodata: Sequence[float] = ()
     # "continuous" reduces each zone to numeric statistics; "categorical" builds
     # a per-zone class histogram (majority, minority, variety, class breakdown).
     mode: str = "continuous"
@@ -200,8 +203,12 @@ def _merge_variance(np, mean_row, m2_row, existing_count, tile_count, tile_sum, 
     mean_row[merge] += delta * (weight_b / combined)
 
 
-def _valid_mask(np, values, nodata):
-    """Return the finite, non-nodata mask for one band's window values."""
+def _valid_mask(np, values, nodata, extra=None):
+    """Return the finite, non-nodata mask for one band's window values.
+
+    ``extra`` is an optional list of user-supplied values (e.g. a categorical 0
+    for out-of-boundary) to drop in addition to the band's declared nodata.
+    """
     if np.issubdtype(values.dtype, np.floating):
         valid = np.isfinite(values)
     else:
@@ -209,6 +216,8 @@ def _valid_mask(np, values, nodata):
         valid = np.ones(values.shape, dtype=bool)
     if nodata is not None:
         valid &= values != nodata
+    if extra:
+        valid &= ~np.isin(values, extra)
     return valid
 
 
@@ -311,7 +320,7 @@ MAX_CATEGORICAL_CLASSES = 65536
 
 def _iter_masked_pixels(
     np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-    band_position, nodata_by_band, slots, need_covered, all_touched,
+    band_position, nodata_by_band, extra_nodata, slots, need_covered, all_touched,
     is_cancelled, progress,
 ):
     """Yield ``(row, ids, values, base_covered)`` for each (window, group, band).
@@ -368,7 +377,7 @@ def _iter_masked_pixels(
                 for local_index, band_index in enumerate(band_chunk):
                     row = band_position[band_index]
                     values = data[local_index][inside]
-                    valid = _valid_mask(np, values, nodata_by_band[band_index])
+                    valid = _valid_mask(np, values, nodata_by_band[band_index], extra_nodata)
                     if valid.all():
                         yield row, label_values, values, base_covered
                     else:
@@ -434,7 +443,7 @@ def _write_continuous(
 
     for row, ids, raw_vals, base_covered in _iter_masked_pixels(
         np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-        band_position, nodata_by_band, slots, need_nodata, options.all_touched,
+        band_position, nodata_by_band, options.extra_nodata, slots, need_nodata, options.all_touched,
         is_cancelled, progress,
     ):
         if need_nodata:
@@ -552,7 +561,7 @@ def _write_categorical(
 
     for row, ids, raw_vals, base_covered in _iter_masked_pixels(
         np, gdal, ogr, osr, dataset, gt, projection, windows, chunks,
-        band_position, nodata_by_band, slots, need_nodata, options.all_touched,
+        band_position, nodata_by_band, options.extra_nodata, slots, need_nodata, options.all_touched,
         is_cancelled, progress,
     ):
         if need_nodata:
