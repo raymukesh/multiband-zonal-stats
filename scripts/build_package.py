@@ -16,7 +16,7 @@ PLUGIN_NAME = "multiband_zonal_stats"
 # Everything QGIS needs at runtime. Tests, packaging scripts and VCS metadata
 # are deliberately excluded.
 EXTRA_FILES = ("metadata.txt", "icon.svg", "help.html", "LICENSE", "README.md", "CHANGELOG.md")
-EXCLUDED_DIRECTORIES = {"tests", "scripts", "dist", ".git", "__pycache__", ".venv"}
+EXCLUDED_DIRECTORIES = {"tests", "scripts", "dist", ".git", "__pycache__", ".venv", "docs", "site", ".github"}
 
 
 def read_version() -> str:
