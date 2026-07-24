@@ -289,6 +289,7 @@ class FastZonalStatsDialog(QDialog):
 
         footer_layout = QHBoxLayout()
         self.helpButton = QPushButton(self.tr("Help"))
+        self.histogramButton = QPushButton(self.tr("Histogram…"))
         self.openButton = QPushButton(self.tr("Open result"))
         self.openButton.setVisible(False)
         self.cancelButton = QPushButton(self.tr("Cancel"))
@@ -297,6 +298,7 @@ class FastZonalStatsDialog(QDialog):
         self.runButton = QPushButton(self.tr("Run analysis"))
         self.runButton.setDefault(True)
         footer_layout.addWidget(self.helpButton)
+        footer_layout.addWidget(self.histogramButton)
         footer_layout.addWidget(self.openButton)
         footer_layout.addStretch(1)
         footer_layout.addWidget(self.cancelButton)
@@ -441,6 +443,7 @@ class FastZonalStatsDialog(QDialog):
         self.closeButton.clicked.connect(self.close)
         self.openButton.clicked.connect(self.openResult)
         self.helpButton.clicked.connect(self.openHelp)
+        self.histogramButton.clicked.connect(self.openHistogram)
 
     def refreshLayers(self):
         self.rasterCombo.setProject(QgsProject.instance())
@@ -636,6 +639,26 @@ class FastZonalStatsDialog(QDialog):
         """Open the bundled help page in the user's default web browser."""
         help_path = Path(__file__).with_name("help.html")
         QDesktopServices.openUrl(QUrl.fromLocalFile(str(help_path)))
+
+    def openHistogram(self):
+        """Preview the distribution of the selected raster in a popup chart."""
+        layer = self.rasterCombo.currentLayer()
+        if layer is None:
+            QMessageBox.information(self, self.tr("Histogram"), self.tr("Choose a raster first."))
+            return
+        if layer.providerType() != "gdal":
+            QMessageBox.information(
+                self,
+                self.tr("Histogram"),
+                self.tr("The histogram reads the raster with GDAL, so it needs a file-based raster."),
+            )
+            return
+        raster_path = layer.source().split("|", 1)[0]
+        band_labels = [(index, layer.bandName(index)) for index in range(1, layer.bandCount() + 1)]
+        from .histogram import HistogramDialog
+
+        dialog = HistogramDialog(raster_path, band_labels, self._isCategorical(), self)
+        dialog.exec()
 
     def reject(self):
         if self.task:

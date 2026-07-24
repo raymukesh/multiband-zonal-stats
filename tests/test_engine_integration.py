@@ -304,6 +304,21 @@ class EngineIntegrationTests(unittest.TestCase):
                     self.two_band_raster(), self.overlapping_zones(), str(Path(folder) / "x.csv"), options
                 )
 
+    def test_raster_histogram_continuous(self):
+        raster = self.two_band_raster()  # band 1 holds values 1..16
+        hist = engine.raster_histogram(raster, 1, categorical=False, bins=4)
+        self.assertFalse(hist["categorical"])
+        self.assertEqual(hist["valid"], 16)
+        self.assertEqual(sum(hist["counts"]), 16)
+        self.assertEqual(len(hist["edges"]), 5)  # bins + 1
+        self.assertAlmostEqual(hist["min"], 1.0)
+        self.assertAlmostEqual(hist["max"], 16.0)
+        self.assertAlmostEqual(hist["mean"], 8.5)
+
+    def test_raster_histogram_rejects_bad_band(self):
+        with self.assertRaisesRegex(ValueError, "range"):
+            engine.raster_histogram(self.two_band_raster(), 9, categorical=False)
+
     def test_unknown_output_format_is_rejected(self):
         raster = self.two_band_raster()
         options = engine.EngineOptions(bands=[1], statistics=["count"], output_format="tall")

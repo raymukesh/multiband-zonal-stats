@@ -213,6 +213,20 @@ class CategoricalEngineTests(unittest.TestCase):
         finally:
             engine.MAX_CATEGORICAL_CLASSES = original
 
+    def test_raster_histogram_categorical(self):
+        hist = engine.raster_histogram(self.classes_raster(), 1, categorical=True)
+        self.assertTrue(hist["categorical"])
+        self.assertEqual(hist["valid"], 16)
+        self.assertEqual(hist["variety"], 4)
+        self.assertEqual(hist["majority"], 3)
+        self.assertEqual(dict(hist["classes"]), {1: 4, 2: 4, 3: 5, 4: 3})
+        self.assertFalse(hist["truncated"])
+
+    def test_raster_histogram_excludes_nodata(self):
+        hist = engine.raster_histogram(self.classes_raster(nodata=4), 1, categorical=True)
+        self.assertEqual(hist["valid"], 13)
+        self.assertEqual(hist["variety"], 3)  # class 4 is nodata
+
     def test_unknown_categorical_layout_is_rejected(self):
         options = engine.EngineOptions(
             bands=[1], statistics=["variety"], mode="categorical", output_format="wide"

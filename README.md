@@ -21,6 +21,8 @@ counted for every polygon. Multipart features retain one zone ID.
   - **Categorical** — majority, minority and variety (distinct class count) per
     zone and band, or a full per-class pixel count and fraction breakdown
 - Band lists and ranges such as `all`, `1-8`, or `1,3,7`
+- Preview any band's distribution with a built-in histogram (continuous bins or
+  categorical class counts) before running
 - Every output row starts with a unique `fid` column as its stable identity
 - Optional fixed **decimal places** for numeric cells (default: full precision)
 - Output columns keep the raster's own band names, with an optional common prefix

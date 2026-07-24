@@ -139,6 +139,7 @@
     <a href="#layouts">Layouts &amp; examples</a>
     <a href="#bands">Band names</a>
     <a href="#fid">fid &amp; decimals</a>
+    <a href="#histogram">Histogram</a>
     <a href="#crs">Coordinate systems</a>
     <a href="#tips">Tips &amp; troubleshooting</a>
   </nav>
@@ -306,6 +307,24 @@
            digit; set <code>0–15</code> to fix the decimals — only floating-point cells (stats,
            fraction) change; integers stay clean.</p>
       </div>
+    </div>
+  </section>
+
+  <section id="histogram">
+    <h2><span class="emoji">📊</span>Histogram preview</h2>
+    <div class="card">
+      <p style="margin-top:0">The <b>Histogram…</b> button (bottom-left of the dialog) opens a quick
+        preview of a band's distribution — handy before you commit to an analysis.</p>
+      <ul>
+        <li>Pick any <b>band</b>, and toggle <span class="chip blue">Continuous</span> (binned values,
+            with an adjustable bin count) or <span class="chip amber">Categorical</span> (one bar per
+            class). It opens on the mode of your active tab.</li>
+        <li>It describes the <b>whole raster</b> (it ignores the polygons) and reads the band
+            <b>decimated</b> for speed, so even large rasters preview promptly.</li>
+        <li>Summary stats sit beneath the chart: min / max / mean / sd for continuous, or the class
+            count and majority for categorical.</li>
+      </ul>
+      <p style="margin-bottom:0" class="muted">Drawn with Qt directly — no extra Python packages needed.</p>
     </div>
   </section>
 
