@@ -2,6 +2,8 @@
 
 ## 0.5.0 — 2026-07-22
 
+- Mark the plugin as stable (`experimental=False`) and complete the metadata for
+  the QGIS plugin repository: `repository`, `tracker` and `homepage` URLs
 - Add an **Exclude values** input (dialog and both algorithms) that drops
   specific pixel values from the calculation as extra nodata — e.g. `0` for
   out-of-boundary in categorical rasters — on top of the raster's declared nodata
