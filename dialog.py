@@ -36,6 +36,7 @@ from qgis.PyQt.QtWidgets import (
     QProgressBar,
     QPushButton,
     QScrollArea,
+    QSizePolicy,
     QSpinBox,
     QSplitter,
     QTabWidget,
@@ -72,8 +73,8 @@ class FastZonalStatsDialog(QDialog):
         self.output_path = None
         self.setWindowTitle(self.tr("Multiband Zonal Stats"))
         self.setWindowIcon(QIcon(str(Path(__file__).with_name("icon.svg"))))
-        self.setMinimumSize(640, 540)
-        self.resize(820, 720)
+        self.setMinimumSize(760, 540)
+        self.resize(1000, 720)
         self.setModal(False)
         self._buildUi()
         self._connectSignals()
@@ -183,11 +184,11 @@ class FastZonalStatsDialog(QDialog):
             },
         )
         continuous_form.addRow(self.tr("Statistics"), self.statsList)
-        self.formatCombo = QComboBox()
+        self.formatCombo = self._compactCombo(QComboBox())
         self.formatCombo.addItems(
             [
-                self.tr("Long — one row per polygon and band"),
-                self.tr("Wide — one row per polygon, bands across columns"),
+                self.tr("Long (row per polygon & band)"),
+                self.tr("Wide (bands across columns)"),
             ]
         )
         continuous_form.addRow(self.tr("Layout"), self.formatCombo)
@@ -210,12 +211,12 @@ class FastZonalStatsDialog(QDialog):
             },
         )
         categorical_form.addRow(self.tr("Statistics"), self.catStatsList)
-        self.catFormatCombo = QComboBox()
+        self.catFormatCombo = self._compactCombo(QComboBox())
         self.catFormatCombo.addItems(
             [
-                self.tr("Summary — one row per polygon and band"),
-                self.tr("Class breakdown — one row per polygon, band and class"),
-                self.tr("Class counts — one row per polygon and band, one column per class"),
+                self.tr("Summary (row per polygon & band)"),
+                self.tr("Class breakdown (row per class)"),
+                self.tr("Class counts (column per class)"),
             ]
         )
         categorical_form.addRow(self.tr("Layout"), self.catFormatCombo)
@@ -275,7 +276,7 @@ class FastZonalStatsDialog(QDialog):
         splitter.addWidget(self._buildAboutPanel())
         splitter.setStretchFactor(0, 1)  # the form takes the extra width
         splitter.setStretchFactor(1, 0)  # the About panel keeps its size
-        splitter.setSizes([560, 260])
+        splitter.setSizes([730, 250])
         root.addWidget(splitter, 1)
 
         self.statusLabel = QLabel(self.tr("Ready"))
@@ -317,6 +318,24 @@ class FastZonalStatsDialog(QDialog):
         line.setFrameShape(qt_enum(QFrame, "Shape", "HLine"))
         line.setFrameShadow(qt_enum(QFrame, "Shadow", "Sunken"))
         return line
+
+    def _compactCombo(self, combo):
+        """Keep a combo's long item text from dictating the whole form's width.
+
+        Without this, an item like "Class counts (one column per class)" forces
+        the combo — and therefore the form — to be hundreds of pixels wide. The
+        combo instead sizes to a short minimum and expands to fill its row; the
+        full text still shows in the drop-down and in the hint beneath it.
+        """
+        combo.setMinimumContentsLength(16)
+        combo.setSizeAdjustPolicy(
+            qt_enum(QComboBox, "SizeAdjustPolicy", "AdjustToMinimumContentsLengthWithIcon")
+        )
+        combo.setSizePolicy(
+            qt_enum(QSizePolicy, "Policy", "Expanding"),
+            qt_enum(QSizePolicy, "Policy", "Fixed"),
+        )
+        return combo
 
     def _readMetadata(self):
         """Read the plugin's own metadata.txt so the About panel stays in sync."""
