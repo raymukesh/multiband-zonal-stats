@@ -101,48 +101,6 @@ QtWidgets to QtGui, and the class-scoped enums that QGIS 4 relocated into the
 central `Qgis` namespace — preferring the modern spelling and falling back to
 the legacy one.
 
-## Install for development
-
-1. Rename or copy this directory to `multiband_zonal_stats` inside the QGIS
-   user profile's `python/plugins` directory.
-2. Restart QGIS or reload plugins.
-3. Enable **Multiband Zonal Stats** in Plugin Manager.
-4. Open it from the Raster menu, toolbar, or Processing Toolbox.
-
-No separate Python packages are required beyond the GDAL and NumPy versions
-distributed with QGIS.
-
-## Smoke test in QGIS
-
-1. Load a multiband raster and a polygon layer.
-2. Open it from the **Raster → Multiband Zonal Stats** menu, the toolbar, or the Processing Toolbox.
-3. Select inputs, leave bands as `all`, choose an output CSV and run.
-4. Compare several polygon/band results with QGIS's standard zonal statistics.
-5. Repeat with overlapping multipolygons, nodata and the all-touched option.
-
-## Development tests
-
-The engine tests need GDAL and NumPy, so run them with QGIS's bundled Python:
-
-```bash
-# Windows
-"C:\Program Files\QGIS 3.40.5\bin\python-qgis-ltr.bat" -m unittest discover -s tests -t tests -v
-# macOS / Linux
-python3 -m unittest discover -s tests -t tests -v
-```
-
-`tests/test_utils.py` and `tests/test_engine_helpers.py` are pure Python and run
-under any interpreter. `tests/test_engine_integration.py` exercises real GDAL
-rasterization against known-correct values and skips if GDAL is unavailable.
-
-A full in-QGIS run, including plugin registration and the dialog's Qt enum
-lookups, is available as:
-
-```bash
-"C:\Program Files\QGIS 3.40.5\bin\python-qgis-ltr.bat" tests/qgis_runtime_smoke.py
-```
-
-Build an installable ZIP with:
 
 ```bash
 python scripts/build_package.py
